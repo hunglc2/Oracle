@@ -1,0 +1,84 @@
+SUPPLIER QUERY
+SELECT 
+  aps.segment1 SUPPLIER_NUMBER,
+  aps.vendor_name SUPPLIER_NAME,
+  apss.city,apsc.first_name||' '||apsc.last_name AS
+"ContactName",
+  apsc.PHONE,
+  apsc.FAX_AREA_CODE||'-'||apsc.FAX as "FAX NUMBER",
+  APSC.EMAIL_ADDRESS EMAIL_ID
+  FROM ap_suppliers aps,
+  ap_supplier_sites_all apss,
+  ap_supplier_contacts apsc
+WHERE 1 = 1 AND aps.vendor_id = apss.vendor_id
+ AND apss.vendor_site_id = apsc.vendor_site_id
+
+
+*********************************************************
+select
+pov.vendor_id,
+pov.vendor_name supplier,
+pov.vendor_type_lookup_code,
+sl.location_code shipto_location,
+bl.location_code billto_location,
+pov.customer_num,
+pov.ship_via_lookup_code,
+pov.fob_lookup_code,
+rt.name terms,
+pov.set_of_books_id,
+pov.credit_status_lookup_code,
+pov.credit_limit
+from ra_terms rt,
+hr_locations bl,
+hr_locations sl,
+po_vendors pov
+where pov.vendor_name like ‘Abb%’
+and   pov.ship_to_location_id=sl.location_id(+)
+and   pov.bill_to_location_id=bl.location_id(+)
+and   pov.terms_id=rt.term_id(+)
+order by 1
+/
+select
+pov.vendor_name Supplier,
+povs.vendor_site_id,
+povs.vendor_site_code Site,
+povs.address_line1 A1ddress,
+povs.address_line2 A2ddress,
+povs.address_line3 A3ddress,
+povs.city||’, ‘||
+povs.state||’ ‘||
+povs.zip A4ddress,
+povs.ship_to_location_id,
+povs.bill_to_location_id,
+povs.ship_via_lookup_code,
+povs.freight_terms_lookup_code,
+povs.fob_lookup_code
+from po_vendors pov,
+po_vendor_sites povs
+where pov.vendor_id=601
+and   pov.vendor_id=povs.vendor_id
+order by 1
+/
+Query to find Supplier contacts :
+select
+vc.vendor_contact_id,
+vc.vendor_site_id,
+vc.first_name,
+vc.middle_name,
+vc.last_name,
+vc.prefix,
+vc.title,
+vc.mail_stop,
+vc.area_code,
+vc.phone,
+vc.department,
+vc.email_address,
+vc.url,
+vc.alt_area_code,
+vc.alt_phone,
+vc.fax_area_code,
+vc.inactive_date,
+vc.fax
+from po_vendor_contacts vc
+where vc.vendor_site_id=4556
+order by 1

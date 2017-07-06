@@ -1,0 +1,63 @@
+DECLARE
+-- This program is used to submit an concurrent program (XML Publisher) from back end.--
+l_responsibility_id NUMBER;
+l_application_id     NUMBER;
+l_user_id           NUMBER;
+l_request_id            NUMBER;
+lc_boolean2       BOOLEAN;
+BEGIN
+  --
+  SELECT DISTINCT fr.responsibility_id,
+    frx.application_id
+     INTO l_responsibility_id,
+    l_application_id
+     FROM apps.fnd_responsibility frx,
+    apps.fnd_responsibility_tl fr
+    WHERE fr.responsibility_id = frx.responsibility_id
+  AND LOWER (fr.responsibility_name) LIKE LOWER('%Your Responsibility%');
+  --
+   SELECT user_id
+   INTO l_user_id
+   FROM fnd_user WHERE user_name = 'YOUR USERNAME';
+  --
+  --To set environment context.
+  --
+  apps.fnd_global.apps_initialize (l_user_id,l_responsibility_id,l_application_id);
+  --
+  --Submitting Concurrent Request
+  --
+ 
+   lc_boolean2 :=
+               fnd_request.add_layout (
+                            template_appl_name   => 'SQLAP', --Application Short Name
+                            template_code        => 'XX_TEST', -- XML Data Template Code
+                            template_language    => 'en', --Use language from template definition
+                            template_territory   => 'US', --Use territory from template definition
+                            output_format        => 'EXCEL' --Use output format from template definition
+                                    );
+ 
+ 
+  l_request_id := fnd_request.submit_request ( 
+                            application   => 'SQLAP', --Application Short Name
+                            program       => 'XX_TEST', --Conc Program Short Name
+                            description   => 'Test program', --Conc Program Description
+                            start_time    => sysdate, 
+                            sub_request   => FALSE,
+   argument1     => 'Val1', --Give parameter Original values not value set values
+    argument2    => 'Val2',
+    argument3    => 'Val3'
+  );
+  --
+  COMMIT;
+  --
+  IF l_request_id = 0
+  THEN
+     dbms_output.put_line ('Concurrent request failed to submit');
+  ELSE
+     dbms_output.put_line('Successfully Submitted the Concurrent Request');
+  END IF;
+  --
+EXCEPTION
+WHEN OTHERS THEN
+  dbms_output.put_line('Error While Submitting Concurrent Request '||TO_CHAR(SQLCODE)||'-'||sqlerrm);
+END;

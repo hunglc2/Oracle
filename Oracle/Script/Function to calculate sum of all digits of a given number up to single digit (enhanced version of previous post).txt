@@ -1,0 +1,43 @@
+CREATE OR REPLACE
+  FUNCTION SF_SUM_OF_DIGITS(
+      p_num NUMBER)
+    RETURN NUMBER
+  IS
+    l_sum NUMBER;
+    l_len NUMBER := LENGTH(p_num);
+    l_num NUMBER;
+  BEGIN
+    l_num  := p_num;
+    l_sum  := p_num;
+    WHILE (l_len > 1)
+    LOOP
+      l_sum := 0;
+      FOR i IN 1 .. l_len
+      LOOP
+        l_sum := l_sum + SUBSTR(l_num, i, 1);
+      END LOOP;
+      l_len := LENGTH(l_sum);
+      l_num := l_sum;
+    END LOOP;
+    RETURN(l_sum);
+  END;
+  /
+ 
+SELECT SF_SUM_OF_DIGITS(123456789012) FROM dual;
+ 
+ 
+SF_SUM_OF_DIGITS(123456789012)
+------------------------------
+                             3
+ 
+SELECT sf_sum_of_digits(1234) FROM dual;
+ 
+SF_SUM_OF_DIGITS(1234)
+----------------------
+                     1
+ 
+SELECT sf_sum_of_digits(5) FROM dual;
+ 
+SF_SUM_OF_DIGITS(5)
+-------------------
+                  5

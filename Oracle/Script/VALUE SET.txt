@@ -1,0 +1,9 @@
+SELECT
+                    FVV.FLEX_VALUE || ' - ' || FVV.DESCRIPTION AS DESCRIPTION,
+                    FVV.FLEX_VALUE
+                FROM
+                     FND_FLEX_VALUE_SETS FVS
+                    ,FND_FLEX_VALUES_VL FVV
+                WHERE
+                    FVV.FLEX_VALUE_SET_ID = FVS.FLEX_VALUE_SET_ID
+                    AND FVS.FLEX_VALUE_SET_NAME = 'VNM_DVSX'-- 'VNM_YES_NO'

@@ -1,0 +1,18 @@
+CREATE TABLE DAILY_SUPPORT_SUMMARY(
+   TICKET_DATE   date,
+   TOTAL_TICKETS_OPENED   number(9),
+   TOTAL_CLOSED   number(9),
+   TOTAL_WIP   number(9),
+   PERCENTAGE_PROCESSED   number(9,2) AS
+      (
+            ((TOTAL_CLOSED+ TOTAL_WIP)/ TOTAL_TICKETS_OPENED)*100
+      ) VIRTUAL,
+   PERCENTAGE_CLOSED   number(9,2) GENERATED ALWAYS AS
+      (
+            (TOTAL_CLOSED/ TOTAL_TICKETS_OPENED)*100
+      ) ,
+   PERCENTAGE_WIP   number(9,2) AS
+      (
+            (TOTAL_WIP/ TOTAL_TICKETS_OPENED)*100
+      )
+);

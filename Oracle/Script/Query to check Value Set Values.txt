@@ -1,0 +1,24 @@
+SELECT ffvs.flex_value_set_id ,
+ffvs.flex_value_set_name ,
+ffvs.description set_description ,
+ffvs.validation_type,
+ffv.flex_value,
+ffvt.description value_description,
+ffv.enabled_flag,
+ffv.last_update_date,
+ffv.last_updated_by,
+ffv.attribute1,
+ffv.attribute2,
+ffv.attribute3–Include attribute values based on DFF segments
+
+FROM fnd_flex_value_sets ffvs ,
+fnd_flex_values ffv ,
+fnd_flex_values_tl ffvt
+
+WHERE
+ffvs.flex_value_set_id = ffv.flex_value_set_id
+and ffv.flex_value_id = ffvt.flex_value_id
+AND ffvt.language = USERENV(‘LANG’)
+and flex_value_set_name like ‘Give Value Set Name’
+
+ORDER BY flex_value asc

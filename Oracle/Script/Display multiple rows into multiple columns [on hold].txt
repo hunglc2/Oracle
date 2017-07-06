@@ -1,0 +1,23 @@
+﻿TBL_Site
+
+Site  AC  Address 
+ABC   A   1804 BROADWAY ST
+ABC   A   1804 STHWY 27
+ABC   A   1804 STHWY 29
+
+Output Should be:
+
+Site     AC     Address 1        Address 2      Address 3
+ABC      A      1804 BROADWAY ST 1804 STHWY 27  1804 STHWY 29
+
+-------------------------------------------
+select *
+from  (
+   select Site, AC,
+          ROW_NUMBER() OVER (partition by Site, AC order by address) addr_num,
+          Address
+   from   TBL_Site
+) pivot (
+    max(Address)
+    for Addr_num in (1, 2, 3, 4, 5, 6)
+)

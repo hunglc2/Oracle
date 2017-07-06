@@ -1,0 +1,1533 @@
+APPS ALL QUERIES
+Query to find few business groups set up in the instance :
+select
+business_group_id,name
+from per_business_groups
+where lower(name) like ‘%vision corporation%’
+order by name
+/
+Query to find legal entities associated with a SOB
+select
+organization_id legal_entity_id,
+business_group_id,
+name,
+date_from,
+date_to,
+set_of_books_id,
+vat_registration_number
+from hr_legal_entities
+where set_of_books_id=1
+and business_group_id=202
+Query to find inventory organizations for an operating unit :
+select
+organization_id,
+organization_code,
+organization_name,
+(select location_id from hr_all_organization_units ou
+where od.organization_id=ou.organization_id) location_id,
+user_definition_enable_date,
+disable_date,
+chart_of_accounts_id,
+inventory_enabled_flag,
+operating_unit,
+legal_entity,
+set_of_books_id,
+business_group_id
+from org_organization_definitions od
+where operating_unit=204
+order by organization_code
+/
+The location_id found here is referenced in hr_locations table (described later), for detailed address information of this organization.
+to find SOBs set up in the instance :
+select
+set_of_books_id,
+name sob_name,
+chart_of_accounts_id,
+chart_of_accounts_name,
+period_set_name calendar_period,
+accounted_period_type,
+user_period_type,
+currency_code
+from gl_sets_of_books_v
+where set_of_books_id=1
+/
+find operating units for a legal entity :
+select
+organization_id operating_unit,
+name,
+business_group_id,
+substr(set_of_books_id,1,10),
+substr(legal_entity_id,1,10),
+date_from,
+date_to
+from hr_operating_units
+where legal_entity_id=204
+/
+select
+ood.organization_code ORG_CODE,
+<
+/span>a.master_organization_id MASTER_ORG_ID,
+o1.organization_code MASTER_ORG_CD,
+o1.organization_name MASTER_ORG_NM,
+a.cost_organization_id COST_ORG_ID,
+o2.organization_code COST_ORG_CD,
+o2.organization_name COST_ORG_NM,
+a.source_organization_id SOURCE_ORG_ID,
+o3.organization_code SOURCE_ORG_CD,
+o3.organization_name SOURCE_ORG_NM,
+mfg1.meaning PRIMARY_COST_METHOD,
+mfg2.meaning NEGATIVE_BALANCE,
+mfg11.meaning GL_UPDATE_CODE,
+a.calendar_code CALENDAR_CODE,
+a.default_demand_class DEFAULT_DEMAND_CLASS,
+mfg12.meaning ENCUMBRANCE_REVERSAL_FLAG,
+mfg3.meaning LOCATOR_CONTROL,
+mfg4.meaning INTERORG_TRANSFER_CODE,
+DECODE(a.maintain_fifo_qty_stack_type, NULL,”,mfg6.meaning)
+MAINTAIN_FIFO_COST,
+mfg7.meaning SERIAL_NUMBER_TYPE,
+mfg8.meaning LOT_NUMBER_UNIQUENESS,
+mfg9.meaning LOT_NUMBER_GENERATION,
+DECODE(a.LOT_NUMBER_ZERO_PADDING, NULL, ” ,
+mfg10.meaning)
+LOT_NUMBER_ZERO_PADDING,
+b.rule_name ATP_RULE_NAME,
+c.picking_rule_name PICKING_RULE_NAME,
+a.default_locator_order_value,
+a.default_subinv_order_value,
+a.interorg_trnsfr_charge_percent intorg_charge_percent,
+a.auto_serial_alpha_prefix,
+a.start_auto_serial_number,
+a.auto_lot_alpha_prefix,
+a.lot_number_length,
+mfg13.meaning SERIAL_GENERATION,
+mfg14.meaning SOURCE_TYPE,
+a.source_subinventory SOURCE_SUBINV
+from
+mtl_parameters a,
+mtl_atp_rules b,
+mtl_picking_rules c,
+org_organization_definitions ood,
+org_organization_definitions o1,
+org_organization_definitions o2,
+org_organization_definitions o3,
+mfg_lookups mfg1,
+mfg_lookups mfg2,
+mfg_lookups mfg3,
+mfg_lookups mfg4,
+mfg_lookups mfg6,
+mfg_lookups mfg7,
+mfg_lookups mfg8,
+mfg_lookups mfg9,
+mfg_lookups mfg10,
+mfg_lookups mfg11,
+mfg_lookups mfg12,
+mfg_lookups mfg13,
+mfg_lookups mfg14
+where a.organization_id = 207
+and a.master_organization_id = o1.organization_id (+)
+and a.cost_organization_id = o2.organization_id (+)
+and a.source_organization_id = o3.organization_id (+)
+and a.organization_id = ood.organization_id (+)
+and a.default_atp_rule_id = b.rule_id(+)
+and a.default_picking_rule_id = c.picking_rule_id(+)
+and mfg1.lookup_type (+) = ‘MTL_PRIMARY_COST’
+and a.primary_cost_method = mfg1.lookup_code(+)
+and mfg2.lookup_type (+) = ‘SYS_YES_NO’
+and a.negative_inv_receipt_code = mfg2.lookup_code(+)
+and mfg3.lookup_type (+) = ‘MTL_LOCATION_CONTROL’
+and a.stock_locator_control_code = mfg3.lookup_code(+)
+and mfg4.lookup_type (+) = ‘MTL_INTER_INV_TRANSFER’
+and a.matl_interorg_transfer_code = mfg4.lookup_code(+)
+and mfg6.lookup_type (+) = ‘SYS_YES_NO’
+and a.maintain_fifo_qty_stack_type = mfg6.lookup_code(+)
+and mfg7.lookup_type (+) = ‘MTL_SERIAL_NUMBER_TYPE’
+and a.serial_number_type = mfg7.lookup_code(+)
+and mfg8.lookup_type (+) = ‘MTL_LOT_UNIQUENESS’
+and a.lot_number_uniqueness = mfg8.lookup_code(+)
+and mfg9.lookup_type (+) = ‘MTL_LOT_GENERATION’
+and a.lot_number_generation = mfg9.lookup_code(+)
+and mfg10.lookup_type (+) = ‘SYS_YES_NO’
+and a.lot_number_zero_padding = mfg10.lookup_code(+)
+and mfg11.lookup_type (+) = ‘SYS_YES_NO’
+and a.general_ledger_update_code = mfg11.lookup_code(+)
+and mfg12.lookup_type (+) = ‘SYS_YES_NO’
+and a.encumbrance_reversal_flag = mfg12.lookup_code(+)
+and mfg13.lookup_type (+) = ‘MTL_SERIAL_GENERATION’
+and a.serial_number_generation = mfg13.lookup_code(+)
+and mfg14.lookup_type (+) = ‘MTL_SOURCE_TYPES’
+and a.source_type = mfg14.lookup_code (+)
+/
+Query to find subinventories for an inv organization :
+select
+secondary_inventory_name subinventory,
+description,
+subinventory_type,
+organization_id,
+asset_inventory,
+quantity_tracked,
+inventory_atp_code,
+availability_type,
+reservable_type,
+locator_type,
+picking_order,
+dropping_order,
+location_id,
+status_id
+from mtl_secondary_inventories
+where organization_id=207
+order by subinventory
+/
+Find items restricted to a subinventory :
+select
+isb.inventory_item_id,
+isb.organization_id,
+si.segment1 item,
+isb.secondary_inventory,
+isb.primary_subinventory_flag,
+
+isb.picking_order,
+isb.min_minmax_quantity,
+isb.max_minmax_quantity,
+isb.inventory_planning_code,
+isb.fixed_lot_multiple,
+isb.minimum_order_quantity,
+isb.maximum_order_quantity,
+isb.source_type,
+isb.source_organization_id,
+isb.source_subinventory
+from mtl_item_sub_inventories isb,
+mtl_system_items si
+where isb.secondary_inventory=’Stores’
+and isb.inventory_item_id=si.inventory_item_id
+and isb.organization_id=si.organization_id
+order by 1
+/
+Query to find locators in a subinventory:
+select
+il.inventory_location_id,
+il.organization_id,
+il.subinventory_code,
+il.description,
+il.physical_location_id,
+il.pick_uom_code,
+il.dimension_uom_code,
+il.length,
+il.width,
+il.height,
+il.locator_status,
+il.status_id,
+l.meaning
+from mfg_lookups l,
+mtl_item_locations il
+where organization_id=207
+and subinventory_code=’Stores’
+and il.inventory_location_type=l.lookup_code(+)
+and l.lookup_type (+) = ‘MTL_LOCATOR_TYPES’
+/
+Query to find Customer contacts and their roles :
+select
+oc.JOB_TITLE ,
+oc.PARTY_SITE_ID,
+RELATIONSHIP_ID ,
+RELATIONSHIP_TYPE ,
+hp.PARTY_NAME OBJECT_NAME, — Contact
+OBJECT_ID ,
+OBJECT_TYPE ,
+OBJECT_TABLE_NAME ,
+hr.PARTY_ID ,
+RELATIONSHIP_CODE ,
+SUBJECT_ID ,
+SUBJECT_TYPE ,
+SUBJECT_TABLE_NAME ,
+oc.TITLE ,
+oc.MAIL_STOP ,
+oc.CONTACT_KEY ,
+ocr.ROLE_TYPE ,
+DIRECTIONAL_FLAG
+from HZ_ORG_CONTACT_ROLES ocr,
+HZ_ORG_CONTACTS oc,
+HZ_PARTIES hp,
+HZ_RELATIONSHIPS hr
+where hr.subject_id=1004 –Party id of the customer
+and hr.object_id=hp.party_id
+and hr.RELATIONSHIP_ID=oc. PARTY_RELATIONSHIP_ID
+and oc.ORG_CONTACT_ID = ocr.ORG_CONTACT_ID(+)
+order by OBJECT_NAME
+/
+Query to find communication channels for a customer :
+Select
+CONTACT_POINT_ID ,
+CONTACT_POINT_TYPE ,
+EMAIL_ADDRESS,
+PHONE_NUMBER,
+URL,
+CONTACTS,
+STATUS ,
+OWNER_TABLE_NAME ,
+OWNER_TABLE_ID ,
+PRIMARY_FLAG ,
+ORIG_SYSTEM_REFERENCE
+From
+HZ_CONTACT_POINTS
+Where OWNER_TABLE_NAME =’HZ_PARTIES’
+And OWNER_TABLE_ID = 1004 –Party_id for ‘Hilman and Associates’
+/
+Query to find Organization type Party info :
+select
+hp.PARTY_ID,
+hp.PARTY_NUMBER,
+hp.PARTY_NAME,
+hca.ACCOUNT_NUMBER,
+hca.CUST_ACCOUNT_ID,
+hop.ORGANIZATION_PROFILE_ID ,
+hop.EFFECTIVE_START_DATE ,
+hop.EFFECTIVE_END_DATE ,
+hop.ORGANIZATION_NAME ,
+hop.DUNS_NUMBER ,
+hop.ENQUIRY_DUNS ,
+hop.CEO_NAME ,
+hop.CEO_TITLE ,
+hop.PRINCIPAL_NAME ,
+hop.PRINCIPAL_TITLE ,
+hop.LEGAL_STATUS ,
+hop.CONTROL_YR ,
+hop.EMPLOYEES_TOTAL ,
+hop.HQ_BRANCH_IND ,
+hop.BRANCH_FLAG ,
+hop.OOB_IND ,
+hop.LINE_OF_BUSINESS
+From
+HZ_ORGANIZATION_PROFILES hop,
+HZ_CUST_ACCOUNTS hca,
+HZ_PARTIES hp
+Where hp.party_name=’Hilman and Associates’
+and hp.PARTY_ID = hca.PARTY_ID
+and hp.PARTY_ID = hop.PARTY_ID
+and sysdate BETWEEN hop.EFFECTIVE_START_DATE AND nvl(hop.EFFECTIVE_END_DATE , sysdate+1)
+Order by hca.ACCOUNT_NUMBER
+/
+Query to find supplier info :
+select
+pov.vendor_id,
+pov.vendor_name supplier,
+pov.vendor_type_lookup_code,
+sl.location_code shipto_location,
+bl.location_code billto_location,
+pov.customer_num,
+pov.ship_via_lookup_code,
+pov.fob_lookup_code,
+rt.name terms,
+pov.set_of_books_id,
+pov.credit_status_lookup_code,
+pov.credit_limit
+from ra_terms rt,
+hr_locations bl,
+hr_locations sl,
+po_vendors pov
+where pov.vendor_name like ‘Abb%’
+and pov.ship_to_location_id=sl.location_id(+)
+and pov.bill_to_location_id=bl.location_id(+)
+and pov.terms_id=rt.term_id(+)
+order by 1
+/
+Query to find Supplier sites :
+select
+pov.vendor_name Supplier,
+povs.vendor_site_id,
+povs.vendor_site_code Site,
+povs.address_line1 A1ddress,
+povs.address_line2 A2ddress,
+povs.address_line3 A3ddress,
+povs.city||’, ‘||
+povs.state||’ ‘||
+povs.zip A4ddress,
+povs.ship_to_location_id,
+povs.bill_to_location_id,
+povs.ship_via_lookup_code,
+povs.freight_terms_lookup_code,
+povs.fob_lookup_code
+from po_vendors pov,
+po_vendor_sites povs
+where pov.vendor_id=601
+and pov.vendor_id=povs.vendor_id
+order by 1
+/
+Query to find Supplier contacts :
+select
+vc.vendor_contact_id,
+vc.vendor_site_id,
+vc.first_name,
+vc.middle_name,
+vc.last_name,
+vc.prefix,
+vc.title,
+vc.mail_stop,
+vc.area_code,
+vc.phone,
+vc.department,
+vc.email_address,
+vc.url,
+vc.alt_area_code,
+vc.alt_phone,
+vc.fax_area_code,
+vc.inactive_date,
+vc.fax
+from po_vendor_contacts vc
+where vc.vendor_site_id=4556
+order by 1
+/
+Query to get item attributes NOT under status control :
+select meaning1 attrib_group,user_attribute_name_gui,
+– ,control_level, status_control_code,attribute_name,
+– attribute_group_id,data_type,
+– user_attribute_name,level_updateable_flag,
+– validation_code ,lookup_type1,
+– lookup_code1,enabled_flag1,lookup_type2,lookup_code2,
+meaning2 control_level,
+– ,enabled_flag2,
+– lookup_type3,lookup_code3,
+meaning3 status_control,
+– enabled_flag3,lookup_type4,lookup_code4,
+meaning4 validation
+– ,enabled_flag4
+from
+mtl_item_attributes_v
+where control_level in (1,2)
+and status_control_code is null
+and user_attribute_name_gui is not null
+and attribute_name in (
+select attribute_name from mtl_item_attr_appl_inst_v )
+order by
+attribute_group_id_gui, sequence_gui
+/
+Query to get item status attribute controls :
+select
+ia.attribute_group_id group_id,
+ia.user_attribute_name_gui,
+lk.meaning controlled_at,
+ia.attribute_name,
+– ia.user_attribute_name,
+ia.status_control_code,
+ia.validation_code
+from fnd_lookup_values lk,
+mtl_item_attributes ia
+where ia.control_level=lk.lookup_code
+and lk.lookup_type=’ITEM_CONTROL_LEVEL_GUI’
+order by ia.attribute_group_id,1
+/
+Query to find item status attributes :
+select
+mis.inventory_item_status_code item_status,
+mis.description,
+mis.disable_date,
+av.attribute_name,
+av.attribute_value value
+from mtl_item_status mis,
+mtl_status_attribute_values av
+where mis.inventory_item_status_code=
+av.inventory_item_status_code
+order by 1
+/
+Query to get item attributes under status control :
+select meaning1 attrib_group,user_attribute_name_gui,
+– ,control_level, status_control_code,attribute_name,
+– attribute_group_id,data_type,
+– user_attribute_name,level_updateable_flag,
+– validation_code ,lookup_type1, lookup_code1,enabled_flag1,lookup_type2,lookup_code2,
+meaning2 control_level,
+– ,enabled_flag2,
+– lookup_type3,lookup_code3,
+meaning3 status_control,
+– enabled_flag3,lookup_type4,lookup_code4,
+meaning4 validation
+– ,enabled_flag4
+from
+mtl_item_attributes_v where control_level in (1,2) and status_control_code
+is not null and user_attribute_name_gui is not null and attribute_name in (
+select attribute_name
+from mtl_item_attr_appl_inst_v ) order by
+attribute_group_id_gui, sequence_gui
+/
+Query to find an Item attribute info :
+select segment1 item,msi.description,inventory_item_id,ml.meaning item_type,
+(select ia.user_attribute_name_gui||’.’||msi.inventory_item_status_code
+from mtl_item_attributes_v ia where lower(ia.att
+ribute_name) =’mtl_system_items.inventory_item_status_code’) attribute,
+(select ia.user_attribute_name_gui||’.’||msi.purchasing_item_flag
+from mtl_item_attributes_v ia where lower(ia.attribute_name) =’mtl_system_items.purchasing_item_flag’) attribute,
+(select ia.user_attribute_name_gui||’.’||msi.shippable_item_flag
+from mtl_item_attributes_v ia where lower(ia.attribute_name) =’mtl_system_items.shippable_item_flag’) attribute,
+(select ia.user_attribute_name_gui||’.’||msi.mtl_transactions_enabled_flag
+from mtl_item_attributes_v ia where lower(ia.attribute_name) =’mtl_system_items.mtl_transactions_enabled_flag’) attribute,
+(select ia.user_attribute_name_gui||’.’||msi.so_transactions_flag
+from mtl_item_attributes_v ia where lower(ia.attribute_name) =’mtl_system_items.so_transactions_flag’) attribute,
+(select ia.user_attribute_name_gui||’.’||msi.internal_order_enabled_flag
+from mtl_item_attributes_v ia where lower(ia.attribute_name) =’mtl_system_items.internal_order_enabled_flag’) attribute,
+(select ia.user_attribute_name_gui||’.’||msi.customer_order_enabled_flag
+from mtl_item_attributes_v ia where lower(ia.attribute_name) =’mtl_system_items.customer_order_enabled_flag’) attribute,
+(select ia.user_attribute_name_gui||’.’||msi.purchasing_enabled_flag
+from mtl_item_attributes_v ia where lower(ia.attribute_name) =’mtl_system_items.purchasing_enabled_flag’) attribute,
+(select ia.user_attribute_name_gui||’.’||msi.inventory_asset_flag
+from mtl_item_attributes_v ia where lower(ia.attribute_name) =’mtl_system_items.inventory_asset_flag’) attribute,
+(select ia.user_attribute_name_gui||’.’||msi.eng_item_flag
+from mtl_item_attributes_v ia where lower(ia.attribute_name) =’mtl_system_items.eng_item_flag’) attribute,
+(select ia.user_attribute_name_gui||’.’||msi.inventory_item_flag
+from mtl_item_attributes_v ia where lower(ia.attribute_name) =’mtl_system_items.inventory_item_flag’) attribute,
+(select ia.user_attribute_name||’.’||msi.service_item_flag
+from mtl_item_attributes_v ia where lower(ia.attribute_name) =’mtl_system_items.service_item_flag’) attribute,
+(select ia.user_attribute_name_gui||’.’||msi.internal_order_flag
+from mtl_item_attributes_v ia where lower(ia.attribute_name) =’mtl_system_items.internal_order_flag’) attribute,
+(select ia.user_attribute_name_gui||’.’||msi.build_in_wip_flag
+from mtl_item_attributes_v ia where lower(ia.attribute_name) =’mtl_system_items.build_in_wip_flag’) attribute,
+(select ia.user_attribute_name_gui||’.’||msi.bom_enabled_flag
+from mtl_item_attributes_v ia where lower(ia.attribute_name) =’mtl_system_items.bom_enabled_flag’) attribute,
+(select ia.user_attribute_name_gui||’.’||msi.stock_enabled_flag
+from mtl_item_attributes_v ia where lower(ia.attribute_name) =’mtl_system_items.stock_enabled_flag’) attribute
+from
+fnd_lookup_values ml,
+mtl_system_items msi
+where msi.segment1 like ‘AS18947%’
+and msi.organization_id=204
+and msi.item_type=ml.lookup_code(+)
+and ml.lookup_type(+)=’ITEM_TYPE’
+order by 1,2
+/
+Query to find Item template attribute values :
+select
+it.template_name,
+ita.attribute_name,
+ita.attribute_value
+from mtl_item_templates it,
+mtl_item_templ_attributes ita
+where it.template_name like ‘ATO Model%’
+and it.template_id=ita.template_id
+and ita.attribute_value is not null
+order by 1,2
+/
+Query to find item cross-references :
+select
+msi.segment1 item,
+mcr.cross_reference_type reference_type,
+mcr.cross_reference,
+mcr.description
+from mtl_cross_references mcr,
+mtl_system_items msi
+where mcr.cross_reference_type=’Vendor’
+and mcr.inventory_item_id=msi.inventory_item_id
+and mcr.organization_id=msi.organization_id
+order by 1,2
+/
+Query to find Customer items :
+select
+hp.party_name customer,
+ci.customer_item_number,
+ci.customer_item_desc,
+msi.segment1 item,
+msi.description item_desc,
+ci.customer_category_code,
+ci.item_definition_level,
+ci.commodity_code_id,
+ci.address_id
+from
+hz_parties hp,
+hz_cust_accounts hca,
+mtl_system_items msi,
+mtl_customer_items ci,
+mtl_customer_item_xrefs ix
+where ci.customer_item_id=ix.customer_item_id
+and ix.inventory_item_id=msi.inventory_item_id
+and ix.master_organization_id=msi.organization_id
+and ci.customer_id=hca.cust_account_id
+and hca.party_id=hp.party_id
+order by 1,2
+/
+Query to find Manufacturer items :
+select
+mm.manufacturer_name,
+mp.mfg_part_num,
+mp.description,
+msi.segment1 inv_item,
+msi.description item_desc
+from
+mtl_system_items msi,
+mtl_mfg_part_numbers mp,
+mtl_manufacturers mm
+where mm.manufacturer_id=mp.manufacturer_id
+and mp.inventory_item_id=msi.inventory_item_id
+and mp.organization_id=msi.organization_id
+order by 1,2
+/
+Query to find related items :
+select
+ito.segment1 item,
+ito.description,
+itr.segment1 related_item,
+itr.description,
+ml.meaning relation,
+ri.reciprocal_flag
+from
+mfg_lookups ml,
+mtl_system_items itr,
+mtl_system_items ito,
+mtl_related_items ri
+where ri.inventory_item_id=ito.inventory_item_id
+and ri.organization_id=ito.organization_id
+and ri.related_item_id=itr.inventory_item_id
+and ri.organization_id=itr.organization_id
+and ri.relationship_type_id=ml.lookup_code
+and ml.lookup_type(+)=’MTL_RELATIONSHIP_TYPES’
+order by 1,2
+/
+Query to find default category for a category set :
+select
+mcats.category_set_name,
+mcat.segment1 default_category,
+mcat.description cat_desc,
+mcat.category_id,
+mcats.category_set_id
+from
+mtl_category_sets mcats,
+mtl_categories mcat
+where mcats.category_set_name like ‘%’
+and mcat.category_id = mcats.default_category_id
+order by 1,2
+/
+Query to find all items assigned to categories of a category set :
+select
+mcats.category_set_name,
+mcat.segment1||’.’|| mcat.segment2 category,
+msi.segment1 item,
+msi.description item_desc
+from
+mtl_item_categories micat,
+mtl_category_sets mcats,
+mtl_categories mcat,
+mtl_system_items_vl msi
+where mcats.category_set_name like ‘Inv%’
+and micat.category_set_id = mcats.category_set_id
+and micat.category_id = mcat.category_id
+and mcat.segment1 like ‘N%’
+and msi.inventory_item_id = micat.inventory_item_id
+and msi.organization_id = micat.organization_id
+and msi.organization_id = 204
+order by 1,2,3
+/
+Query to find out the customer, line item, ordered qty and price info of the order :
+select
+h.order_number,
+org.name customer_name,
+h.ordered_date order_date,
+ot.name order_type,
+s.name sales_rep,
+l.line_id,
+l.line_number,
+l.inventory_item_id,
+si.segment1,
+l.ordered_quantity,
+l.unit_selling_price,
+nvl(l.ordered_quantity,0) * nvl(l.unit_selling_price,0) amount,
+h.transactional_curr_code currency_code
+from ra_salesreps s,
+oe_transaction_types_tl ot,
+oe_sold_to_orgs_v org,
+mtl_system_items_vl si,
+oe_order_lines_all l,
+oe_order_headers_all h
+where h.order_number= 14463
+and h.org_id = 204
+and l.header_id = h.header_id
+and h.sold_to_org_id = org.organization_id
+and (h.cancelled_flag is null or h.cancelled_flag = ‘N’)
+and h.open_flag=’Y’
+and l.open_flag = ‘Y’
+and l.service_reference_line_id is null
+and l.inventory_item_id = si.inventory_item_id
+and nvl(si.organization_id,0) = 204 –Item master orgn
+and h.order_type_id = ot.transaction_type_id
+and h.salesrep_id=s.salesrep_id
+and h.org_id=s.org_id
+order by l.line_id
+/
+a: Oe_sold_to_orgs_v is a view based on hz_parties and hz_cust_accounts.
+b: Ra_salesreps is a view based on JTF_RS_SALESREPS and JTF_RS_RESOURCE_EXTNS_VL.
+You must set the org context for the views to function properly as..
+begin
+fnd_client_info.set_org_context(‘204′);
+end;
+Query to find customer, ship to and bill to information of an order :
+select
+h.order_number,
+c.name customer_name,
+lk1.meaning Freight_Terms,
+lk2.meaning FOB,
+s.location_code ship_location_code,
+s.address_line_1 ship_address1,
+s.address_line_2 ship_address2,
+s.state ship_state,
+s.postal_code ship_zip,
+s.country ship_country,
+b.location_code bill_location_code,
+b.address_line_1 bill_address1,
+b.address_line_2 bill_address2,
+b.country bill_country
+from
+ar_lookups lk2,
+oe_lookups lk1,
+oe_sold_to_orgs_v c,
+oe_invoice_to_orgs_v b,
+oe_ship_to_orgs_v s,
+oe_order_headers_all h
+where h.order_number= 14463
+and h.org_id = 204
+and h.ship_to_org_id = s.organization_id
+and h.invoice_to_org_id = b.organization_id
+and h.sold_to_org_id = c.organization_id
+and h.freight_terms_code = lk1.lookup_code(+)
+and lk1.lookup_type(+) = ‘FREIGHT_TERMS’
+and lk2.lookup_code(+) = h.fob_point_code
+and lk2.lookup_type(+) = ‘FOB’
+/
+a: The oe_ship_to_orgs_v and oe_invoice_to_orgs_v views are based on HZ_CUST_SITE_USES_ALL, HZ_CUST_ACCT_SITES_ALL, HZ_PARTY_SITES and HZ_LOCATIONS.
+b: Oe_lookups and ar_lookups are views based on fnd_lookup_values.
+Query to find out order and line hold information :
+select ho.name hold_name,
+hs.hold_until_date,
+hs.hold_comment,
+h.order_number,
+oh.header_id,
+oh.line_id,
+oh.order_hold_id,
+l.item_identifier_type,
+l.inventory_item_id,
+l.ordered_item
+from oe_order_holds_all oh,
+oe_order_lines_all l,
+oe_order_headers_all h,
+oe_hold_definitions ho,
+oe_hold_sources_all hs
+where h.order_number= 14463
+and oh.header_id = h.header_id
+and (h.cancelled_flag is null or h.cancelled_flag = ‘N’)
+and h.open_flag=’Y’
+and oh.hold_source_id = hs.hold_source_id
+and hs.hold_id = ho.hold_id
+and h.header_id = l.header_id(+)
+and l.open_flag = ‘Y’
+and l.line_id = nvl(oh.line_id,l.line_id)
+and l.service_reference_line_id is null
+and oh.hold_release_id is null
+pan>and nvl(h.org_id,0) = 204
+and nvl(l.org_id,0) = nvl(h.org_id,0)
+order by ho.name,h.order_number
+/
+Query to find freight related info of order viz: freight carrier, ship method and service level :
+select
+h.order_number,
+h.shipping_method_code,
+wc.carrier_name,
+wcsm.SERVICE_LEVEL ,
+wcsm.freight_code
+from
+wsh_carrier_ship_methods_v wcsm,
+wsh_carriers_v wc,
+oe_order_headers_all h
+where h.order_number= 14463
+and h.org_id = 204
+and h.shipping_method_code = wcsm.ship_method_code(+)
+and nvl(wcsm.organization_id(+),0) = 204 –Master Organization
+and wcsm.freight_code = wc.freight_code(+)
+order by h.order_number
+/
+Query to find price discounts and surcharges on order lines :
+Select h.order_number,
+l.line_number,
+pa.list_line_type_code,
+pa.arithmetic_operator,
+pa.operand,
+DECODE(PA.MODIFIER_LEVEL_CODE,’ORDER’,
+L.UNIT_LIST_PRICE*L.ORDERED_QUANTITY *PA.OPERAND * SIGN(PA.ADJUSTED_AMOUNT)/100,
+(PA.ADJUSTED_AMOUNT* NVL(L.ORDERED_QUANTITY,0) )) DISCOUNT_AMT
+From
+qp_list_headers_vl lh,
+oe_price_adjustments pa,
+oe_order_lines_all l,
+oe_order_headers_all h
+Where h.order_number = 14463
+and h.header_id = l.header_id
+and h.org_id = l.org_id
+and h.header_id = pa.header_id
+and l.line_id = pa.line_id(+)
+and pa.list_header_id = lh.list_header_id
+AND ( PA.LIST_LINE_TYPE_CODE = ‘DIS’
+OR PA.LIST_LINE_TYPE_CODE = ‘SUR’
+OR PA.LIST_LINE_TYPE_CODE = ‘PBH’ )
+AND PA
+.APPLIED_FLAG=’Y’
+AND NOT EXISTS
+(SELECT ‘X’
+FROM OE_PRICE_ADJ_ASSOCS PAS,
+OE_PRICE_ADJUSTMENTS PA1
+WHERE PAS.RLTD_PRICE_ADJ_ID =
+PA.PRICE_ADJUSTMENT_ID
+AND PA1.PRICE_ADJUSTMENT_ID=
+PAS.PRICE_ADJUSTMENT_ID
+AND PA1.LIST_LINE_TYPE_CODE =’PBH’)
+Order by l.line_id
+/
+a: Qp_list_headers_vl is view based on qp_list_headers_b and qp_list_headers_tl tables.
+Query to find freight charges on order lines :
+select
+HEADER_ID ,
+LINE_ID ,
+CHARGE_ID ,
+CHARGE_NAME ,
+CHARGE_AMOUNT ,
+CURRENCY_CODE ,
+INVOICED_FLAG ,
+INTERCO_INVOICED_FLAG ,
+ORG_ID ,
+SOURCE_SYSTEM_CODE ,
+ESTIMATED_FLAG ,
+INVOICED_AMOUNT
+from OE_CHARGE_LINES_V
+where header_id=
+(select header_id
+from oe_order_headers_all
+where order_number=14463)
+order by line_id
+/
+a: The OE_CHARGE_LINES_V view is based on oe_price_adjustments, oe_order_headers_all and oe_order_lines_all for FREIGHT CHARGES.
+select distinct lv.parent_segment_id,lc.location_id_segment_1,
+location_segment_user_value ,lr.from_postal_code,lr.to_postal_code,
+location_segment_value, lr.tax_rate
+from ar_location_rates lr,
+ar_location_combinations lc,
+ar_location_values lv
+where lv.location_segment_user_value=’CA’ –State name
+and lv.location_segment_id=lc.location_id_segment_1
+and lv.location_structure_id= lc.location_structure_id
+and lc.location_structure_id=101
+and lv.location_segment_id=lr.location_segment_id
+order by 1
+/
+Table ar_sales_tax contains location wise total tax- rates with tax break up ..
+select distinct
+location_id,
+rate_context,
+tax_rate,
+location1_rate,
+location2_rate,
+location3_rate,
+from_postal_code,
+to_postal_code
+from ar_sales_tax
+where location_id=1000
+and enabled_flag=’Y’
+/
+Query to find out the shipper info :
+select
+wnd.delivery_id delivery_id,
+substrb(party.party_name,1,50) customer,
+wpb.name batch_name,
+wsh_util_core.get_location_description(
+wnd.INITIAL_PICKUP_LOCATION_ID,
+‘NEW UI CODE’) ship_from,
+wsh_util_core.get_location_description(
+wnd.ULTIMATE_DROPOFF_LOCATION_ID,
+‘NEW UI CODE’) ship_to,
+wnd.INITIAL_PICKUP_DATE pickup_date,
+wnd.ULTIMATE_DROPOFF_DATE dropoff_date,
+lv.meaning ship_method,
+wnd.WAYBILL waybill,
+wnd.GROSS_WEIGHT gross_weight,
+wnd.WEIGHT_UOM_CODE uom,
+wnd.status_code,
+we.message
+from wsh_new_deliveries wnd,
+wsh_picking_batches wpb,
+wsh_exceptions we,
+fnd_lookup_values_vl lv,
+hz_cust_accounts cust_acct,
+hz_parties party
+where wnd.delivery_id = 12814
+and wpb.batch_id = wnd.batch_id
+and we.delivery_id(+) = wnd.delivery_id
+and we.exception_name(+) = ‘WSH_BATCH_MESSAGE’
+and lv.lookup_code(+) = wpb.ship_method_code
+and lv.lookup_type(+) = ‘SHIP_METHOD’
+and lv.view_application_id(+) = 3
+and cust_acct.cust_account_id (+)=wnd.customer_id
+and party.party_id(+) = cust_acct.party_id
+/
+Query to find out shipper detail info :
+SELECT
+wnd.delivery_id,
+wnd.name delivery_name,
+wdd.source_header_number
+so_order_number,
+oola.line_number so_line_number,
+wdd.source_header_id so_header_id,
+wdd.source_line_id so_line_id,
+wdd.shipping_instructions,
+wdd.inventory_item_id,
+wdd.requested_quantity_uom,
+msi.description item_description,
+msi.revision_qty_control_code ,
+wdd.ship_method_code carrier,
+wdd.shipment_priority_code priority,
+wdd.organization_id,
+wnd.initial_pickup_location_id,
+wdd.released_status,
+wdd.source_code
+FROM mtl_system_items_vl msi,
+oe_order_lines_all oola,
+wsh_delivery_details wdd,
+wsh_delivery_assignments wda,
+wsh_new_deliveries wnd
+WHERE wnd.delivery_id =18910
+AND wda.delivery_id = wnd.delivery_id(+)
+AND wdd.delivery_detail_id = wda.delivery_detail_id
+AND wdd.inventory_item_id = msi.inventory_item_id(+)
+AND wdd.organization_id = msi.organization_id(+)
+AND wdd.source_line_id = oola.line_id
+AND wdd.source_header_id = oola.header_id
+/
+Query to find out Move order line details :
+SELECT
+wnd.delivery_id,
+wnd.name delivery_name,
+wnd.initial_pickup_location_id,
+mtrh.request_number mo_number,
+mtrl.line_number mo_line_number,
+mtrl.line_id mo_line_id,
+mtrl.from_subinventory_code,
+mtrl.to_subinventory_code,
+mtrl.lot_number,
+mtrl.serial_number_start,
+mtrl.serial_number_end,
+mtrl.uom_code,
+mtrl.quantity,
+mtrl.quantity_delivered,
+mtrl.quantity_detailed,
+wdd.source_header_number so_order_number,
+oola.line_number so_line_number,
+wdd.source_header_id so_header_id,
+wdd.source_line_id so_line_id,
+wdd.shipping_instructions,
+wdd.inventory_item_id,
+wdd.requested_quantity_uom,
+msi.description item_description,
+msi.revision_qty_control_code ,
+wdd.ship_method_code carrier,
+wdd.shipment_priority_code priority,
+wdd.organization_id,
+wdd.released_status,
+wdd.source_code
+FROM mtl_system_items_vl msi,
+oe_order_lines_all oola,
+mtl_txn_request_lines mtrl,
+mtl_txn_request_headers mtrh,
+wsh_delivery_details wdd,
+wsh_delivery_assignments wda,
+wsh_new_deliveries wnd
+WHERE wnd.delivery_id =18910
+AND wda.delivery_id = wnd.delivery_id(+)
+AND wdd.delivery_detail_id = wda.delivery_detail_id
+AND wdd.move_order_line_id = mtrl.line_id
+AND mtrl.header_id = mtrh.header_id
+AND wdd.inventory_item_id = msi.inventory_item_id(+)
+AND wdd.organization_id = msi.organization_id(+)
+AND wdd.source_line_id = oola.line_id
+AND wdd.source_header_id = oola.header_id
+/
+Query to find Bill of Lading info of the Delivery :
+select
+wnd.delivery_id delivery_id,
+wdi.sequence_number bol_number,
+wdi.bol_notify_party,
+wdi.port_of_loading,
+wdi.port_of_discharge,
+wnd.WAYBILL waybill,
+wnd.GROSS_WEIGHT gross_weight,
+wnd.WEIGHT_UOM_CODE uom,
+wnd.status_code
+from wsh_new_deliveries wnd,
+wsh_delivery_legs wdl,
+wsh_document_instances wdi
+where wnd.delivery_id =12784
+and wnd.delivery_id = wdl.delivery_id (+)
+and wdi.entity_id (+) = wdl.delivery_leg_id
+AND wdi.entity_name (+) = ‘WSH_DELIVERY_LEGS’
+AND wdi.document_type (+) = ‘BOL’
+AND wdi.status (+) <> ‘CANCELLED’
+/
+Query to find delivery leg and pick up stop info :
+SELECT wt.trip_id,
+wt.name,
+wt.STATUS_CODE,
+wt.VEHICLE_ITEM_ID,
+wt.VEHICLE_NUMBER,
+wt.CARRIER_ID,
+wt.SHIP_METHOD_CODE,
+wts.STOP_ID,
+wts.STOP_LOCATION_ID,
+wts.STATUS_CODE,
+wts.STOP_SEQUENCE_NUMBER,
+wts.PLANNED_ARRIVAL_DATE,
+wts.PLANNED_DEPARTURE_DATE,
+wts.ACTUAL_ARRIVAL_DATE,
+wts.ACTUAL_DEPARTURE_DATE,
+wts.DEPARTURE_NET_WEIGHT,
+wts.WEIGHT_UOM_CODE,
+wdl.DELIVERY_LEG_ID,
+wdl.DELIVERY_ID,
+wdl.PICK_UP_STOP_ID,
+wdl.DROP_OFF_STOP_ID,
+wdl.SEQUENCE_NUMBER,
+wdl.LOADING_ORDER_FLAG,
+wdl.SHIPPER_TITLE,
+wdl.SHIPPER_PHONE
+FROM wsh_trips wt
+,wsh_trip_stops wts
+,wsh_delivery_legs wdl
+WHERE wdl.delivery_id =12814
+AND wts.stop_id = wdl.pick_up_stop_id
+AND wts.trip_id = wt.trip_id;
+Query to find Requisition details :
+execute fnd_client_info.set_org_context(‘204′);
+col Justification form a24
+col Item_Description form a36
+col Source form a56
+col Source_Type form a12
+col Requestor form a20
+col Line_Type form a12
+col Item form a16
+SELECT prl.line_num Line
+, plt.line_type Line_Type
+, prl.item_id prl_item_id
+, msi.segment1 Item
+, prl.item_revision Rev
+, prl.need_by_date Need_By_Date
+, prl.unit_meas_lookup_code Unit
+, round(prl.quantity,2) Quantity_Amount
+, prl.unit_price Unit_Price
+, DECODE (PRL.order_type_lookup_code, /* <SERVICES FPJ> */
+‘FIXED PRICE’, PRL.amount,
+‘RATE’, PRL.amount,
+NVL(PRL.quantity, 1) * PRL.unit_price) C_AMOUNT
+, ppf.full_name Requestor
+, plc.displayed_field Source_Type
+, decode(prl.source_type_code,’INVENTORY’,ood.organization_name||’ – ‘||prl.source_subinventory,’VENDOR’,prh.segment1||’ – ‘||prl.suggested_vendor_name||’ – ‘||prl.suggested_vendor_location||’ – ‘||prl.suggested_vendor_contact||’ – ‘||prl.suggested_buyer_id,null) Source
+, prl.item_description Item_Description
+, prd.req_line_quantity Distributions
+, prl.justification Justification
+, prl.requisition_header_id
+, prl.requisition_line_id
+FROM po_requisition_headers prh
+, po_requisition_lines prl
+, po_req_distributions prd
+, po_line_types plt
+, per_people_f ppf
+, org_organization_definitions ood
+, po_lookup_codes plc
+, mtl_system_items msi
+, mtl_categories mca
+, gl_code_combinations gcc, financials_system_parameters fsp
+, po_system_parameters psp
+WHERE prh.segment1 = ‘1713’
+AND prl.requisition_line_id = prd.requisition_line_id
+AND prl.requisition_header_id = prh.requisition_header_id
+AND prl.line_type_id = plt.line_type_id
+AND prl.to_person_id = ppf.person_id (+)
+AND prl.source_organization_id = ood.organization_id(+)
+AND plc.lookup_type = ‘REQUISITION SOURCE TYPE’
+AND plc.lookup_code = prl.source_type_code
+AND nvl(ppf.business_group_id, 0) = (select nvl(max(fsp.business_group_id),0)
+from financials_system_parameters fsp)
+AND trunc(sysdate)
+BETWEEN nvl(ppf.effective_start_date, trunc(sysdate))
+AND nvl(ppf.effective_end_date, trunc(sysdate))
+AND prl.item_id = msi.inventory_item_id(+)
+AND msi.organization_id = 204
+AND prl.category_id = mca.category_id
+AND prd.code_combination_id = gcc.code_combination_id
+AND nvl(prl.modified_by_agent_flag,’N’) = ‘N’
+AND nvl(prl.cancel_flag,’N’) != ‘Y’
+AND nvl(prl.closed_code,’OPEN’) != ‘FINALLY CLOSED’
+ORDER BY prl.line_num
+/
+Query to find Requisition header info :
+execute fnd_client_info.set_org_context(‘204′);
+col Description form a40
+col Req_type form a26
+col type_lookup_code form a16
+col PREPARER form a30
+col APPROVER form a30
+col NOTE_TO_APPROVER form a40
+SELECT prh.segment1 Requisition
+, psp.manual_req_num_type req_num_type
+, ppf.full_name Preparer
+, prh.creation_date Creation_Date
+, prh.type_lookup_code
+, ppf1.full_name Approver
+, t.type_name Req_type
+, prh.description Description
+, pah.note Note_To_Approver
+, prh.requisition_header_id Req_header
+FROM po_requisition_headers prh
+, per_people_f ppf1
+, per_people_f ppf
+, po_action_history pah
+, po_system_parameters psp
+, PO_DOCUMENT_TYPES_ALL_TL T
+, PO_DOCUMENT_TYPES_ALL_B B
+WHERE prh.REQUISITION_HEADER_ID=11675
+and NVL(PRH.contractor_requisition_flag, ‘N’) <> ‘Y’
+AND prh.preparer_id = ppf.person_id
+AND nvl(ppf.business_group_id, 0) = (select nvl(max(fsp.business_group_id), 0)
+from financials_system_parameters fsp)
+AND nvl(pah.action_code,’SUBMIT’) in (‘SUBMIT’, ‘FORWARD’, ‘REJECT’, ‘APPROVE’, >
+‘APPROVE AND RESERVE’, ‘RESERVE’, ‘ACCEPT’,’RETURN’)
+–AND prh.segment1 = P_req_num_from
+AND EXISTS (SELECT null
+FROM po_requisition_lines prl
+WHERE prl.requisition_header_id = prh.requisition_header_id
+AND nvl(prl.modified_by_agent_flag,’N’) = ‘N’
+AND nvl(prl.closed_code,’OPEN’) != ‘FINALLY CLOSED’)
+AND pah.object_id = prh.requisition_header_id
+AND pah.employee_id = ppf1.person_id
+AND pah.object_type_code = ‘REQUISITION’
+AND pah.object_sub_type_code = prh.type_lookup_code
+AND pah.sequence_num =
+(SELECT max(sequence_num)
+FROM po_action_history pah
+WHERE pah.object_id = prh.requisition_header_id
+AND pah.object_type_code = ‘REQUISITION’
+AND pah.object_sub_type_code = prh.type_lookup_code)
+and B.DOCUMENT_TYPE_CODE = T.DOCUMENT_TYPE_CODE
+AND B.DOCUMENT_SUBTYPE = T.DOCUMENT_SUBTYPE
+AND b.document_type_code = ‘REQUISITION’
+AND b.document_subtype = prh.type_lookup_code
+AND NVL(B.ORG_ID, -99) = NVL(T.ORG_ID, -99)
+AND NVL(B.ORG_ID,NVL(TO_NUMBER(DECODE(SUBSTRB(USERENV(‘CLIENT_INFO’),1 ,1),’ ‘,
+NULL,SUBSTRB(USERENV(‘CLIENT_INFO’),1,10))),-99))
+= NVL(TO_NUMBER(DECODE(SUBSTRB(USERENV(‘CLIENT_INFO’),1,1),’ ‘, NULL,
+SUBSTRB(USERENV(‘CLIENT_INFO’),1,10))),-99)
+AND T.LANGUAGE = USERENV(‘LANG’)
+/
+Query to find an PO details :
+execute fnd_client_info.set_org_context(‘204′);
+SELECT
+decode(por.release_num,NULL, poh.segment1, poh.segment1 ||’-‘|| por.release_num) PO_Number_Release
+, pol.line_num Line
+, pov.vendor_name Vendor
+, pol.item_revision Rev
+, pol.item_description Description
+, pll.shipment_num
+, pod.distribution_num Distribution
+, decode(plt.order_type_lookup_code, ‘AMOUNT’,NULL,pll.price_override) Unit_Price
+, pll.promised_date Promised_Date
+, pol.unit_meas_lookup_code Unit
+, DECODE (POL.order_type_lookup_code,
+‘RATE’, POD.amount_ordered,
+‘FIXED PRICE’, POD.amount_ordered,
+POD.quantity_ordered) Quantity_Amount_Ordered
+, DECODE (POL.order_
+type_lookup_code,
+‘RATE’, POD.amount_billed,
+‘FIXED PRICE’, POD.amount_billed,
+POD.quantity_billed) Quantity_Amount_Billed
+, DECODE (POL.order_type_lookup_code,
+‘RATE’, POD.amount_delivered,
+‘FIXED PRICE’, POD.amount_delivered,
+POD.quantity_delivered) Qty_Amount_Delivered
+, DECODE (POL.order_type_lookup_code,
+‘RATE’, (NVL(POD.amount_ordered, 0) – NVL(POD.amount_billed, 0)) /
+DECODE (NVL(POD.amount_ordered, 0), 0, 1, POD.amount_ordered),
+‘FIXED PRICE’, (NVL(POD.amount_ordered, 0) – NVL(POD.amount_billed, 0)) /
+DECODE (NVL(POD.amount_ordered, 0), 0, 1, POD.amount_ordered),
+(NVL(POD.quantity_ordered, 0) – NVL(POD.quantity_billed, 0)) /
+DECODE (NVL(POD.quantity_ordered, 0), 0, 1, POD.quantity_ordered)) * 100 Percent_Unbilled
+, DECODE (POL.order_type_lookup_code,
+‘RATE’, POD.amount_ordered – NVL(POD.amount_cancelled, 0)- NVL(POD.amount_billed, 0),
+‘FIXED PRICE’, POD.amount_ordered – NVL(POD.amount_cancelled, 0)- NVL(POD.amount_billed, 0),
+(POD.quantity_ordered – NVL(POD.quantity_cancelled, 0)- NVL(POD.quantity_billed, 0)) * PLL.price_override) C_AMOUNT_OPEN_INV
+, poh.po_header_id
+, pol.po_line_id
+, por.release_num
+, poh.currency_code C_CURRENCY
+, nvl(por.po_release_id,-1) release_id
+FROM po_distributions pod
+, mtl_system_items msi
+, po_line_locations pll
+, po_lines pol
+, po_releases por
+, po_headers poh
+, po_vendors pov
+, financials_system_parameters fsp
+, po_line_types plt
+WHERE poh.segment1=’804′
+AND poh.po_header_id = pol.po_header_id
+AND pol.po_line_id = pll.po_line_id
+AND pll.line_location_id = pod.line_location_id
+AND pol.item_id = msi.inventory_item_id (+)
+AND msi.organization_id = fsp.inventory_organization_id
+AND poh.vendor_id = pov.vendor_id (+)
+AND pll.po_release_id = por.po_release_id (+)
+AND pol.line_type_id = plt.line_type_id
+AND pll.shipment_type in (‘STANDARD’,’BLANKET’,’SCHEDULED’)
+AND nvl(pol.closed_code,’OPEN’) not in (‘CLOSED’,’FINALLY CLOSED’)
+AND nvl(pll.closed_code,’OPEN’) not in (‘CLOSED’,’FINALLY CLOSED’)
+AND nvl(poh.closed_code,’OPEN’) not in (‘CLOSED’,’FINALLY CLOSED’)
+AND nvl(por.closed_code,’OPEN’) not in (‘CLOSED’,’FINALLY CLOSED’)
+AND nvl(poh.cancel_flag,’N’) = ‘N’
+AND nvl(por.cancel_flag,’N’) = ‘N’
+AND nvl(pol.cancel_flag,’N’) = ‘N’
+AND nvl(pll.cancel_flag,’N’) = ‘N’
+ORDER BY pll.line_location_id
+/
+Query to find receipts against a PO shipment line :
+SELECT
+pol.po_header_id,
+pol.po_line_id,
+pll.line_location_id,
+pll.quantity,
+rsh. shipment_header_id,
+rsh. receipt_source_code,
+rsh. vendor_id,
+rsh. vendor_site_id,
+rsh. organization_id,
+rsh. shipment_num,
+rsh. receipt_num,
+rsh. ship_to_location_id,
+rsh. bill_of_lading,
+rsl.shipment_line_id,
+rsl.QUANTITY_SHIPPED,
+rsl.QUANTITY_RECEIVED , span>
+rct.transaction_type,
+rct.transaction_id,
+decode(pol.order_type_lookup_code,’RATE’,nvl(rct.amount,0),’FIXED PRICE’,nvl(rct.amount,0),
+nvl(rct.source_doc_quantity,0) ) transaction_qty
+from rcv_transactions rct
+, rcv_shipment_headers rsh
+, rcv_shipment_lines rsl
+, po_lines pol
+, po_line_locations pll
+where rct.po_line_location_id = 28302
+and rct.po_line_location_id = pll.line_location_id
+and rct.po_line_id = pol.po_line_id
+and nvl(pol.order_type_lookup_code,’QUANTITY’) NOT IN (‘RATE’,’FIXED PRICE’)
+and rct.shipment_line_id=rsl.shipment_line_id
+and rsl.shipment_header_id=rsh.shipment_header_id
+order by rct.transaction_id
+/
+Query to find PO returns :
+SELECT pol.po_header_id,pol.po_line_id,rct.po_line_location_id Line_location_id
+, sum ( (nvl(rct.source_doc_quantity,0)) ) Qty_returned
+from rcv_transactions rct
+, po_lines pol
+, po_line_locations pll
+where rct.transaction_type = ‘RETURN TO VENDOR’
+and rct.po_line_location_id = pll.line_location_id
+and rct.po_line_id = pol.po_line_id
+and nvl(pol.order_type_lookup_code,’QUANTITY’) NOT IN (‘RATE’,’FIXED PRICE’)
+group by pol.po_header_id,pol.po_line_id,rct.po_line_location_id
+union all
+SELECT pol.po_header_id,pol.po_line_id,rct.po_line_location_id Line_location_id
+, sum ( (nvl(rct.amount,0)) ) Qty_returned
+from rcv_transactions rct
+, po_lines pol
+, po_line_locations pll
+where rct.transaction_type = ‘RETURN TO VENDOR’
+and rct.po_line_location_id = pll.line_location_id
+and rct.po_line_id = pol.po_line_id
+and nvl(pol.order_type_lookup_code,’QUANTITY’) IN (‘RATE’,’FIXED PRICE’)
+group by pol.po_header_id,pol.po_line_id,rct.po_line_location_id
+/
+Query to find PO corrections :
+SELECT pol.po_header_id,pol.po_line_id, rct.po_line_location_id Line_location_id
+, sum (nvl(rct1.source_doc_quantity,0) ) Qty_corrected
+from rcv_transactions rct
+, rcv_transactions rct1
+, po_lines pol
+, po_line_locations pll
+where rct.transaction_type in ( ‘RECEIVE’ ,’MATCH’)
+and rct.po_line_location_id = pll.line_location_id
+and rct1.transaction_type = ‘CORRECT’
+and rct1.parent_transaction_id = rct.transaction_id
+and rct1.po_line_location_id = pll.line_location_id
+and rct.po_line_id = pol.po_line_id
+and nvl(pol.order_type_lookup_code,’QUANTITY’) NOT IN (‘RATE’,’FIXED PRICE’)
+group by pol.po_header_id,pol.po_line_id,rct.po_line_location_id
+union all
+SELECT pol.po_header_id,pol.po_line_id,rct.po_line_location_id Line_location_id
+, sum (nvl(rct1.amount,0) ) Qty_corrected
+from rcv_transactions rct
+, rcv_transactions rct1
+, po_lines pol
+, po_line_locations pll
+where rct.transaction_type in ( ‘RECEIVE’ ,’MATCH’)
+and rct.po_line_location_id = pll.line_location_id
+and rct1.transaction_type = ‘CORRECT’
+and rct1.parent_transaction_id = rct.transaction_id
+and rct1.po_line_location_id = pll.line_location_id
+and rct.po_line_id = pol.po_line_id
+and nvl(pol.order_type_lookup_code,’QUANTITY’) IN (‘RATE’,’FIXED PRICE’)
+group by pol.po_header_id,pol.po_line_id,rct.po_line_location_id
+/
+To get valid Ship-to ids……………….
+SELECT site_use_id
+FROM hz_cust_site_uses_all hcsu,
+hz_cust_acct_sites_all hcas,
+hz_cust_accounts_all hca,
+ra_customers rc
+WHERE hca.cust_account_id = hcas.cust_account_id
+AND hcas.cust_acct_site_id = hcsu.cust_acct_site_id
+AND hcsu.site_use_code = ‘SHIP_TO’
+AND hcsu.status = ‘A’
+AND hcas.org_id = 204
+AND rc.customer_number = hca.account_number
+AND rc.customer_id =5453
+to get valid bill-to ids
+SELECT site_use_id
+FROM hz_cust_site_uses_all hcsu,
+<sp
+an style=”color: #00b0f0; font-family: Verdana, sans-serif; font-size: 10pt; line-height: 14px;”>hz_cust_acct_sites_all hcas,
+hz_cust_accounts_all hca,
+ra_customers rc
+WHERE hca.cust_account_id = hcas.cust_account_id
+AND hcas.cust_acct_site_id = hcsu.cust_acct_site_id
+AND hcsu.site_use_code = ‘BILL_TO’
+AND hcsu.status = ‘A’
+AND hcas.org_id = 204
+AND rc.customer_number = hca.account_number
+AND rc.customer_id =5453
+/
+AP PAYMENT EXCEPTIONS
+SELECT DISTINCT
+sob.name sob_name,
+hou.NAME ou_name,
+acl.check_number,
+acl.CURRENCY_CODE,
+acl.amount,
+xxap_dist_amount (ai.invoice_id,
+ail.invoice_distribution_id,
+acl.check_id) line_amt,
+xxap_usd_amount(acl.CURRENCY_CODE,
+acl.check_date,
+<sp
+an style=”color: #00b0f0; font-family: Verdana, sans-serif; font-size: 10pt; line-height: 14px;”>xxap_dist_amount(ai.invoice_id,
+ail.invoice_distribution_id,
+acl.check_id)) usd_amount,
+xxap_usd_amount(acl.CURRENCY_CODE,
+acl.check_date,
+acl.amount) usd_sum,
+acl.check_date,
+pv.vendor_name,
+ai. invoice_num,
+ail.distribution_line_number,
+ai.description,
+ai.ATTRIBUTE10 Approver,
+gcc.segment1,
+gcc.segment2,
+gcc.segment3,
+gcc.segment4,
+gcc.segment5,
+gcc.segment6,
+gcc.segment7,
+gcc.segment8,
+gcc.segment9,
+gcc.segment10,
+gcc.segment11,
+xxap_account_desc(‘247_Entity’,
+gcc.segment1) seg1_desc,
+xxap_account_desc(‘247_Natural’,
+gcc.segment2) seg2_desc,
+xxap_account_desc(‘247_Budget_Code’,
+gcc.segment3) seg3_desc,
+xxap_account_desc(‘247_Program’,
+gcc.segment4) seg4_desc,
+xxap_account_desc(‘247_Location’,
+gcc.segment5) seg5_desc,
+xxap_account_desc(‘247_Business_Unit’,
+gcc.segment6)seg6_desc,
+xxap_account_desc(‘247_Line_Of_Business’,
+gcc.segment7) seg7_desc,
+xxap_account_desc(‘247_Service_Offeings’,
+gcc.segment8) seg8_desc,
+xxap_account_desc(‘247_Entity’,
+gcc.segment9) seg9_desc,
+xxap_account_desc(‘247_Spare1′,
+gcc.segment10) seg10_desc,
+xxap_account_desc(‘247_Spare2′,
+gcc.segment11) seg11_desc,
+DECODE(SUBSTR(gcc.segment2,
+1,
+2),
+’60’,
+‘Opex’,
+’61’,
+‘Opex’,
+’62’,
+‘Opex’,
+’63’,
+‘Opex’,
+’64’,
+‘Opex’,
+’65’,
+‘Opex’,
+’66’,
+‘Opex’,
+’67’,
+‘Opex’,
+’68’,
+‘Opex’,
+’69’,
+‘Opex’,
+’31’,
+‘Capex’,
+‘Advance’) Capex_Opex,
+acl.status_lookup_code,
+ai.doc_sequence_value,
+pvs.vendor_site_code
+FROM
+ap_checks_all acl,
+po_vendors pv,
+ap_invoices_all ai,
+ap_invoice_distributions
+_all ail,
+ap_invoice_payments_all aip,
+gl_code_combinations gcc,
+GL_SETS_OF_BOOKS sob,
+HR_OPERATING_UNITS hou,
+po_vendor_sites_all pvs
+WHERE
+pv.vendor_id = acl.vendor_id AND
+ai.VENDOR_ID = pv.vendor_id AND
+pv.vendor_id = pvs.vendor_id AND
+ai.vendor_site_id = pvs.vendor_site_id AND
+ai.invoice_id = aip.invoice_id AND
+aip.check_id = acl.check_id AND
+ai.invoice_id = ail.invoice_id AND
+ail.DIST_CODE_COMBINATION_ID = gcc.CODE_COMBINATION_ID AND
+ai.SET_OF_BOOKS_ID = sob.SET_OF_BOOKS_ID AND
+hou.organization_id = ai.org_id AND
+acl.amount <> 0 AND
+acl.payment_type_flag <> ‘R’ AND
+ail.line_type_lookup_code = ‘ITEM’
+/
+SUPPLIER MASTER
+SELECT v.vendor_id, v.segment1 AS vendor_num, v.vendor_name,
+NVL (v.vendor_
+type_lookup_code, ‘NULL’) “Vendor Type”,
+v.attribute6 “STAX REG”,
+v.invoice_currency_code “Invoice Currency”,
+v.payment_currency_code “Payment Currency”, t.NAME “Payment Term”,
+s.address_line1, s.address_line2, s.address_line3, s.city, s.state,
+s.country,s.ZIP, s.freight_terms_lookup_code “Freight Term”,
+d1.gl_name_seg2 “Liability Account”,
+d2.gl_name_seg2 “Prepayment Account”,
+d1.gl_seg2 “Liability Account ID”,
+d2.gl_seg2 “Prepayment Account ID”, t.tds_section, t.pan_no,
+t.tan_no, t.ward_no, t.st_reg_no “LST No”, t.cst_reg_no “CST No”,
+s.vendor_site_code, s.vendor_site_id, v.end_date_active,
+DECODE (v.enabled_flag, ‘Y’, ‘Active’, ‘Inactive’) status, s.org_id,
+h.NAME AS organisation_name, v.num_1099, v.type_1099
+FROM po_vendors v,
+ap_terms_tl t,
+po_vendor_sites_all s,
+disc_ccid_dsc_mv d1,
+disc_ccid_dsc_mv d2,
+disc_supplier_tds t,
+hr_all_organization_units h
+WHERE v.terms_id = t.term_id
+AND v.vendor_id = s.vendor_id(+)
+– AND v.vendor_id <> 1
+AND d1.code_combination_id = s.accts_pay_code_combination_id
+AND d2.code_combination_id = s.prepay_code_combination_id
+AND v.vendor_id = t.vendor_id(+)
+AND (SYSDATE + 1) BETWEEN v.start_date_active
+AND NVL (v.end_date_active, ’31-DEC-2999′)
+AND s.org_id NOT IN (’87’, ’86’)
+AND s.org_id = h.organization_id
+FIND REQUISITION DETAILS
+SELECT
+PO_REQUISITION_HEADERS_ALL.SEGMENT1 AS REQUISTION_NUMBER,
+PO_REQUISITION_HEADERS_ALL.CREATION_DATE AS REQUISITION_DATE,
+PO_REQUISITION_HEADERS_ALL.DESCRIPTION,
+PO_REQUISITION_HEADERS_ALL.NOTE_TO_AUTHORIZER,
+PO_REQUISITION_HEADERS_ALL.CANCEL_FLAG,
+PO_REQUISITION_HEADERS_ALL.CLOSED_CODE,
+PO_REQUISITION_LINES_ALL.CATEGORY_ID,
+MTL_CATEGORIES_V.SEGMENT1 AS CATEGORY,
+MTL_CATEGORIES_V.SEGMENT2 AS SUB_CATEGORY,
+PO_REQUISITION_LINES_ALL.ITEM_DESCRIPTION,
+PO_REQUISITION_LINES_ALL.UNIT_MEAS_LOOKUP_CODE UNIT_OF_MEASURE,
+PO_REQUISITION
+_LINES_ALL.UNIT_PRICE,
+PO_REQUISITION_LINES_ALL.QUANTITY,
+PO_REQUISITION_LINES_ALL.DELIVER_TO_LOCATION_ID,
+–DISTRIBUTION_LOCATION.DESCRIPTION AS DELIVER_TO_LOCATION,
+DISC_EMPLOYEE_V.”Employee_Name” AS EMPLOYEE_NAME,
+PO_REQUISITION_LINES_ALL.TO_PERSON_ID,
+PO_REQUISITION_LINES_ALL.ITEM_ID,
+PO_REQUISITION_LINES_ALL.ITEM_REVISION,
+PO_REQUISITION_LINES_ALL.QUANTITY_DELIVERED,
+PO_REQUISITION_LINES_ALL.NEED_BY_DATE,
+PO_REQUISITION_LINES_ALL.LINE_LOCATION_ID,
+PO_REQUISITION_LINES_ALL.BLANKET_PO_HEADER_ID,
+PO_REQUISITION_LINES_ALL.BLANKET_PO_LINE_NUM,
+PO_REQUISITION_LINES_ALL.CURRENCY_UNIT_PRICE,
+PO_REQUISITION_LINES_ALL.SUGGESTED_VENDOR_NAME,
+PO_REQUISITION_LINES_ALL.SUGGESTED_VENDOR_LOCATION,
+PO_REQUISITION_LINES_ALL.SUGGESTED_VENDOR_CONTACT,
+PO_REQUISITION_LINES_ALL.SUGGESTED_VENDOR_PHONE,
+PO_REQUISITION_LINES_ALL.SUGGESTED_VENDOR_PRODUCT_CODE,
+PO_REQUISITION_LINES_ALL.REFERENCE_NUM,
+PO_REQUISITION_LINES_ALL.DESTINATION_ORGANIZATION_ID,
+PO_REQUISITION_LINES_ALL.QUANTITY_CANCELLED,
+PO_REQUISITION_LINES_ALL.CANCEL_DATE,
+PO_REQUISITION_LINES_ALL.CANCEL_REASON,
+PO_REQUISITION_LINES_ALL.VENDOR_ID,
+PO_REQUISITION_LINES_ALL.VENDOR_SITE_ID,
+PO_REQUISITION_LINES_ALL.VENDOR_CONTACT_ID,
+–PO_REQUISITION_LINES_ALL.ATTRIBUTE8 AS TRAVEL_LOCATION_ID,
+–TRAVEL_LOCATION.DESCRIPTION AS TRAVEL_LOCATION,
+–PO_REQUISITION_LINES_ALL.ATTRIBUTE9 AS RECOVERABLE_FROM_CUSTOMER,
+PO_REQUISITION_LINES_ALL.QUANTITY_RECEIVED,
+PO_REQ_DISTRIBUTIONS_ALL.CODE_COMBINATION_ID,
+PO_REQ_DISTRIBUTIONS_ALL.PROJECT_ID,
+PO_REQ_DISTRIBUTIONS_ALL.TASK_ID,
+PO_REQ_DISTRIBUTIONS_ALL.EXPENDITURE_TYPE,
+PO_REQ_DISTRIBUTIONS_ALL.PROJECT_RELATED_FLAG,
+PO_REQ_DISTRIBUTIONS_ALL.EXPENDITURE_ITEM_DATE,
+REQ_CCID_DSC.GL_SEG2 AS CHARGE_GL_SEG2,
+REQ_CCID_DSC.GL_SEG3 AS CHARGE_GL_SEG3,
+REQ_CCID_DSC.GL_SEG4 AS CHARGE_GL_SEG4,
+REQ_CCID_DSC.GL_SEG5 AS CHARGE_GL_SEG5,
+REQ_CCID_DSC.GL_SEG6 AS CHARGE_GL_SEG6,
+REQ_CCID_DSC.GL_NAME_SEG1 AS CHARGE_GL_NAME_SEG1,
+REQ_CCID_DSC.GL_NAME_SEG2 AS CHARGE
+_GL_NAME_SEG2,
+REQ_CCID_DSC.GL_NAME_SEG3 AS CHARGE_GL_NAME_SEG3,
+REQ_CCID_DSC.GL_NAME_SEG4 AS CHARGE_GL_NAME_SEG4,
+REQ_CCID_DSC.GL_NAME_SEG5 AS CHARGE_GL_NAME_SEG5,
+REQ_CCID_DSC.GL_NAME_SEG6 AS CHARGE_GL_NAME_SEG6
+from
+PO_REQUISITION_HEADERS_ALL PO_REQUISITION_HEADERS_ALL,
+PO_REQUISITION_LINES_ALL PO_REQUISITION_LINES_ALL,
+–DISC_SEGMENT4 DISTRIBUTION_LOCATION,
+–DISC_SEGMENT4 TRAVEL_LOCATION,
+DISC_EMPLOYEE_V DISC_EMPLOYEE_V,
+PO_REQ_DISTRIBUTIONS_ALL PO_REQ_DISTRIBUTIONS_ALL ,
+DISC_CCID_DSC_MV REQ_CCID_DSC,
+MTL_CATEGORIES_V MTL_CATEGORIES_V
+where
+PO_REQUISITION_HEADERS_ALL.REQUISITION_HEADER_ID = PO_REQUISITION_LINES_ALL.REQUISITION_HEADER_ID
+–AND PO_REQUISITION_LINES_ALL.DELIVER_TO_LOCATION_ID = DISTRIBUTION_LOCATION.SEGMENT(+)
+AND to_char(PO_REQUISITION_LINES_ALL.TO_PERSON_ID) = DISC_EMPLOYEE_V.”Employee_Num” (+)
+–AND PO_REQUISITION_LINES_ALL.ATTRIBUTE8 = TRAVEL_LOCATION.SEGMENT(+)
+AND PO_REQ_DISTRIBUTIONS_ALL.REQUISITION_LINE_ID = PO_REQUISITION_LINES_ALL.REQUISITION_LINE_ID
+AND REQ_CCID_DSC.CODE_COMBINATION_ID = PO_REQ_DISTRIBUTIONS_ALL.CODE_COMBINATION_ID
+AND MTL_CATEGORIES_V.CATEGORY_ID = PO_REQUISITION_LINES_ALL.CATEGORY_ID

@@ -1,0 +1,50 @@
+SELECT   gjh.period_name            "Period name"
+        ,gjb.name                   "Batch name"
+        ,gjjlv.header_name          "Journal entry"
+        ,gjjlv.je_source            "Source"
+        ,glcc.concatenated_segments "Accounts"
+        ,mmt.subinventory_code      "Subinventory"
+        ,glcc3.segment4             "Costcenter"
+        ,gjjlv.line_entered_dr      "Entered debit"
+        ,gjjlv.line_entered_cr      "Entered credit"
+        ,gjjlv.line_accounted_dr    "Accounted debit"
+        ,gjjlv.line_accounted_cr    "Accounted credit"
+        ,gjjlv.currency_code        "Currency"
+        ,mtt.transaction_type_name  "Transaction type"
+        ,TO_CHAR(mta.transaction_id)"Transaction_number"
+        ,mta.transaction_date       "Transaction_date"
+        ,msi.segment1               "Reference"
+FROM  apps.gl_je_journal_lines_v gjjlv,
+      gl_je_lines gje,
+      mtl_transaction_accounts mta,
+      mtl_material_transactions mmt,
+      mtl_system_items_b msi,
+      gl_je_headers gjh,
+      gl_je_batches gjb,
+      apps.gl_code_combinations_kfv glcc,
+      apps.gl_code_combinations_kfv glcc2,
+      mtl_secondary_inventories msin,
+      mtl_transaction_types mtt,
+      MTL_SECONDARY_INVENTORIES cost,
+      gl_code_combinations glcc3
+WHERE       gjjlv.period_name  BETWEEN 'NOV-2008' AND 'DEC-2008'
+AND         gje.code_combination_id = gje.code_combination_id
+AND         gjjlv.line_je_line_num  = gje.je_line_num
+AND         gl_sl_link_table   = 'MTA'
+AND         gjjlv.je_header_id = gje.je_header_id
+AND         mmt.inventory_item_id = msi.inventory_item_id
+AND         gje.je_header_id = gjh.je_header_id
+AND         gjh.je_batch_id = gjb.je_batch_id
+AND         mmt.organization_id   = msi.organization_id
+AND         mmt.organization_id    = msin.organization_id
+AND         mmt.subinventory_code= msin.secondary_inventory_name
+AND         mta.gl_sl_link_id= gje.gl_sl_link_id
+AND         mta.reference_account = glcc.code_combination_id
+AND         msin.expense_account = glcc2.code_combination_id
+AND         mmt.transaction_id = mta.transaction_id
+AND         mtt.transaction_type_id = mmt.transaction_type_id
+AND         cost.organization_id(+) = mmt.organization_id
+AND         cost.secondary_inventory_name(+) = mmt.subinventory_code
+AND         glcc3.code_combination_id(+) = 
+ 
+          cost.expense_account 

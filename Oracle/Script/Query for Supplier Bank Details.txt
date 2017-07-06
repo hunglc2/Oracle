@@ -1,0 +1,18 @@
+SELECT DISTINCT pv.vendor_name vendor_name, pv.segment1 vendor_number,
+pvs.vendor_site_code vendor_site_code,
+aba.bank_account_name bank_account_name,
+aba.bank_account_num bank_account_num,
+aba.currency_code currency_code,
+abau.primary_flag primary_flag, abb.bank_name bank_name,
+abb.bank_number bank_number,
+abb.bank_branch_name bank_branch_name, abb.bank_num bank_num
+FROM ap_bank_account_uses_all abau,
+ap_bank_accounts_all aba,
+ap_bank_branches abb,
+po_vendors pv,
+po_vendor_sites_all pvs
+WHERE abau.external_bank_account_id = aba.bank_account_id
+AND aba.bank_branch_id = abb.bank_branch_id
+AND abau.vendor_id = pv.vendor_id
+AND abau.vendor_id = pvs.vendor_id(+)
+AND abau.vendor_site_id = pvs.vendor_site_id(+)

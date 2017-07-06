@@ -1,0 +1,30 @@
+CREATE OR REPLACE FUNCTION	XXC_GETPO( p_req_num	IN	VARCHAR2)
+RETURN NUMBER
+IS
+	l_po_num	VARCHAR2(20);
+BEGIN
+	SELECT DISTINCT	PH.segment1
+	INTO	l_po_num
+	FROM	PO_HEADERS_ALL	PH,
+			PO_DISTRIBUTIONS_ALL	PD,
+			PO_REQUISITION_HEADERS_ALL	PRH,
+			PO_REQUISITION_LINES_ALL	PRL,
+			PO_REQ_DISTRIBUTIONS_ALL	PRD
+	WHERE 	PRH.requisition_header_id = PRL.requisition_header_id
+	AND		PRL.requisition_line_id	  = PRD.requisition_line_id
+	AND		PRD.distribution_id       = PD.req_distribution_id
+	AND		PD.po_header_id			  = PH.po_header_id
+	AND		PRH.segment1			  = p_req_num ;
+ 
+	RETURN	TO_NUMBER(l_po_num);
+ 
+EXCEPTION
+	WHEN	NO_DATA_FOUND	THEN
+		dbms_output.put_line('No Data found '||SQLERRM);
+		RETURN -1;
+ 
+	WHEN	OTHERS	THEN
+		dbms_output.put_line('Exception in function XXC_GETPO '||SQLERRM);
+		RETURN -1;
+ 
+END	XXC_GETPO;

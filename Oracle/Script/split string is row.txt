@@ -1,0 +1,1 @@
+select regexp_substr (q, '[^,]+', 1, rownum) split  from dual  connect by level <= length (regexp_replace (q, '[^,]+'))  + 1)

@@ -1,0 +1,38 @@
+---------------------------------------------------------------------------------
+CREATE TABLE test2 (sno NUMBER);
+---------------------------------------------------------------------------------
+INSERT INTO test2 VALUES(1);
+INSERT INTO test2 VALUES(2);
+INSERT INTO test2 VALUES(3);
+INSERT INTO test2 VALUES(6);
+INSERT INTO test2 VALUES(8);
+---------------------------------------------------------------------------------
+ 
+SELECT * FROM test2;
+ 
+SNO
+----
+1
+2
+3
+6
+8
+ 
+---------------------------------------------------------------------------------
+ 
+SELECT min_sno - 1 + level missing_number
+FROM ( SELECT MIN(sno) min_sno
+, MAX(sno) max_sno
+ FROM test2
+  )
+ CONNECT BY level <= max_sno - min_sno + 1
+  minus
+ SELECT sno
+ FROM test2
+---------------------------------------------------------------------------------
+ 
+MISSING_NUMBER
+---------------
+4
+5
+7

@@ -1,0 +1,214 @@
+INVENTORY QUERY
+SELECT msi.segment1 AS item_code
+, mp.organization_code AS org_code
+, decode(moq.subinventory_code,sinv.secondary_inventory_name,moq.subinventory_code,sinv.secondary_inventory_name) AS subinv_code
+, sum(decode(moq.subinventory_code,sinv.secondary_inventory_name,moq.transaction_quantity,sinv.secondary_inventory_name,moq.transaction_quantity,0))AS ohq
+FROM
+apps.mtl_system_items_b msi
+, apps.mtl_onhand_quantities moq
+, apps.mtl_parameters mp
+, (SELECT msec.secondary_inventory_name,
+msec.organization_id
+FROM mtl_secondary_inventories msec
+WHERE msec.secondary_inventory_name IN ('Sub_INVA','Sub_INVB')) sinv
+WHERE AND msi.inventory_item_status_code = 'Active'
+AND msi.inventory_item_id = moq.inventory_item_id(+) 
+AND msi.organization_id = moq.organization_id(+)
+AND (moq.subinventory_code IN ('Sub_INVA','Sub_INVB') OR (moq.subinventory_code IS NULL AND sinv.secondary_inventory_name IN ('Sub_INVA','Sub_INVB')))
+AND msi.organization_id = mp.organization_id
+AND msi.organization_id = sinv.organization_id
+GROUP BY msi.segment1, 
+mp.organization_code, 
+decode(moq.subinventory_code,sinv.secondary_inventory_name,moq.subinventory_code,sinv.secondary_inventory_name)
+ORDER BY msi.segment1, 
+decode(moq.subinventory_code,sinv.secondary_inventory_name,moq.subinventory_code,sinv.secondary_inventory_name), 
+msi.segment1;
+
+
+--------------------------------------------------------------------------------------------------------
+
+SELECT   hou.NAME org, mp.organization_code AS org_code,
+            decode(moq.subinventory_code,sinv.secondary_inventory_name,moq.subinventory_code,sinv.secondary_inventory_name) AS subinventory,
+            mil.concatenated_segments LOCATOR, mil.segment1 warehouse_id,
+            mil.segment2 product_type, mil.segment3 container,
+            mil.segment4 aisle, mil.segment5 bay, mil.segment6 shelf,
+            mil.segment7 project, msi.segment1 AS item_code,
+            msi.description description, msi.primary_uom_code primary_uom,
+            sum(decode(moq.subinventory_code,sinv.secondary_inventory_name,moq.transaction_quantity,sinv.secondary_inventory_name,moq.transaction_quantity,0)) AS ohq,
+            moq.lot_number lot_number, mln.expiration_date expire_date,
+            cic.item_cost standard_cost, msi.list_price_per_unit,
+            mil.attribute1 container_seal, fu1.user_name qty_created_by,
+            fu2.user_name qty_last_updated_by, msi.attribute1 rotatable,
+            msi.attribute2 slep_eligible, msi.attribute3 categoryi_v,
+            TO_NUMBER (msi.attribute4) "Case To Bottle",
+            TO_NUMBER (msi.attribute5) "Case To Each",
+            TO_NUMBER (msi.attribute6) "Pallet QTY",
+            mcst.category_set_name category_name,
+            mc.concatenated_segments item_category,
+            TO_DATE (SUBSTR (mil.attribute2, 1, 10), 'YYYY/MM/DD') seal_date,
+            mil.attribute4 seal_color, mil.attribute3 seal_by,
+            element10.element_value "Indications",
+            element20.element_value "Dose",
+            element30.element_value "Customer",
+            element40.element_value "Adult/Ped",
+            element50.element_value "Pregnancy Class",
+            element60.element_value "Product Identifier",
+            element70.element_value "Conv UOM", mln.attribute1 slep_status,
+            mc.segment1 agent_type, mc.segment2 administrator,
+            mc.segment3 drug_type, mc.segment4 drug_strength,
+            mcr1.cross_reference, mcr2.cross_reference, mcr3.cross_reference,
+            mcr4.cross_reference, misi.min_minmax_quantity,
+            misi.max_minmax_quantity, msi.min_minmax_quantity,
+            msi.max_minmax_quantity, mln.attribute2 original_expiration_date,
+            mln.attribute3 first_extension_project,
+            mln.attribute4 first_extension_date,
+            mln.attribute5 second_extension_project,
+            mln.attribute6 second_extension_date,
+            mln.attribute7 third_extension_project,
+            mln.attribute8 third_extension_date,
+            mln.attribute9 fourth_extension_project,
+            mln.attribute10 fourth_extension_date, msi.organization_id,
+            msi.inventory_item_id
+       FROM apps.mtl_system_items_b msi,
+            apps.mtl_onhand_quantities moq,
+            apps.mtl_parameters mp,
+            apps.hr_organization_units hou,
+            apps.mtl_item_locations_kfv mil,
+            apps.mtl_lot_numbers mln,
+            apps.cst_item_costs cic,
+            apps.fnd_user fu1,
+            apps.fnd_user fu2,
+            apps.mtl_category_sets_tl mcst,
+            apps.mtl_category_sets_b mcs,
+            apps.mtl_categories_kfv mc,
+            apps.mtl_item_categories mic,
+            apps.mtl_descr_element_values element10,
+            apps.mtl_descr_element_values element20,
+            apps.mtl_descr_element_values element30,
+            apps.mtl_descr_element_values element40,
+            apps.mtl_descr_element_values element50,
+            apps.mtl_descr_element_values element60,
+            apps.mtl_descr_element_values element70,
+            apps.mtl_cross_references mcr1,
+            apps.mtl_cross_references mcr2,
+            apps.mtl_cross_references mcr3,
+            apps.mtl_cross_references mcr4,
+            apps.mtl_item_sub_inventories misi,
+            (SELECT msec.secondary_inventory_name, msec.organization_id
+               FROM apps.mtl_secondary_inventories msec
+              WHERE msec.secondary_inventory_name IN ('SUBIN_A','SUBINV_B')) sinv
+      WHERE 1 = 1
+        AND hou.organization_id = mp.organization_id
+        AND moq.locator_id = mil.inventory_location_id(+)
+        AND moq.subinventory_code = mil.subinventory_code(+)
+        AND moq.organization_id = mil.organization_id(+)
+        AND mil.enabled_flag(+) = 'Y'
+        AND msi.inventory_item_status_code = 'Active'
+        AND msi.inventory_item_id = moq.inventory_item_id(+)
+        AND msi.organization_id = moq.organization_id(+)
+        AND mln.lot_number(+) = moq.lot_number
+        AND mln.organization_id(+) = moq.organization_id
+        AND mln.inventory_item_id(+) = moq.inventory_item_id
+        AND msi.inventory_item_id = cic.inventory_item_id(+)
+        AND msi.organization_id = cic.organization_id(+)
+        AND fu2.user_id(+) = moq.last_updated_by
+        AND fu1.user_id(+) = moq.created_by
+        AND mc.structure_id = mcs.structure_id
+        AND mc.category_id = mic.category_id
+        AND mic.inventory_item_id(+) = msi.inventory_item_id
+        AND mic.organization_id = msi.organization_id
+        AND mic.category_set_id = mcs.category_set_id
+        AND mcs.category_set_id = mcst.category_set_id
+        AND mcst.category_set_name = 'Inventory'
+        AND element10.element_name(+) = 'Indications'
+        AND element10.inventory_item_id(+) = msi.inventory_item_id
+        AND element20.element_name(+) = 'Dose'
+        AND element20.inventory_item_id(+) = msi.inventory_item_id
+        AND element30.element_name(+) = 'Customer'
+        AND element30.inventory_item_id(+) = msi.inventory_item_id
+        AND element40.element_name(+) = 'Adult/Ped'
+        AND element40.inventory_item_id(+) = msi.inventory_item_id
+        AND element50.element_name(+) = 'Pregnancy Class'
+        AND element50.inventory_item_id(+) = msi.inventory_item_id
+        AND element60.element_name(+) = 'Product Identifier'
+        AND element60.inventory_item_id(+) = msi.inventory_item_id
+        AND element70.element_name(+) = 'Conv UOM'
+        AND element70.inventory_item_id(+) = msi.inventory_item_id
+        AND msi.inventory_item_id = mcr1.inventory_item_id(+)
+        AND mcr1.cross_reference_type(+) = 'NDC'
+        AND msi.inventory_item_id = mcr2.inventory_item_id(+)
+        AND mcr2.cross_reference_type(+) = 'NSN'
+        AND msi.inventory_item_id = mcr3.inventory_item_id(+)
+        AND mcr3.cross_reference_type(+) = 'NDA'
+        AND msi.inventory_item_id = mcr4.inventory_item_id(+)
+        AND mcr4.cross_reference_type(+) = 'FMCS'
+        AND moq.organization_id = misi.organization_id(+)
+        AND moq.inventory_item_id = misi.inventory_item_id(+)
+        AND moq.subinventory_code = misi.secondary_inventory(+)
+        AND (moq.subinventory_code IN ('SUBIN_A','SUBINV_B') OR (moq.subinventory_code IS NULL AND sinv.secondary_inventory_name IN ('SUBIN_A','SUBINV_B')))
+        AND msi.organization_id = mp.organization_id
+        AND msi.organization_id = sinv.organization_id
+   GROUP BY hou.NAME,
+            msi.segment1,
+            mp.organization_code,
+            decode(moq.subinventory_code,sinv.secondary_inventory_name,moq.subinventory_code,sinv.secondary_inventory_name),
+            mil.concatenated_segments,
+            mil.segment1,
+            mil.segment2,
+            mil.segment3,
+            mil.segment4,
+            mil.segment5,
+            mil.segment6,
+            mil.segment7,
+            msi.description,
+            msi.primary_uom_code,
+            moq.lot_number,
+            mln.expiration_date,
+            cic.item_cost,
+            msi.list_price_per_unit,
+            mil.attribute1,
+            fu1.user_name,
+            fu2.user_name,
+            msi.attribute1,
+            msi.attribute2,
+            msi.attribute3,
+            TO_NUMBER (msi.attribute4),
+            TO_NUMBER (msi.attribute5),
+            TO_NUMBER (msi.attribute6),
+            mcst.category_set_name,
+            mc.concatenated_segments,
+            mil.attribute2,
+            mil.attribute3,
+            mil.attribute4,
+            element10.element_value,
+            element20.element_value,
+            element30.element_value,
+            element40.element_value,
+            element50.element_value,
+            element60.element_value,
+            element70.element_value,
+            mln.attribute1,
+            mc.segment1,
+            mc.segment2,
+            mc.segment3,
+            mc.segment4,
+            mcr1.cross_reference,
+            mcr2.cross_reference,
+            mcr3.cross_reference,
+            mcr4.cross_reference,
+            misi.min_minmax_quantity,
+            misi.max_minmax_quantity,
+            msi.min_minmax_quantity,
+            msi.max_minmax_quantity,
+            mln.attribute2,
+            mln.attribute3,
+            mln.attribute4,
+            mln.attribute5,
+            mln.attribute6,
+            mln.attribute7,
+            mln.attribute8,
+            mln.attribute9,
+            mln.attribute10,
+            msi.organization_id,
+            msi.inventory_item_id
+   ORDER BY 4;

@@ -1,0 +1,135 @@
+Module
+Table
+column
+
+
+
+GL and AP
+GL_CODE_COMBINATIONS
+AP_INVOICES_ALL
+code_combination_id  
+acct_pay_code_combination_id
+GL_CODE_COMBINATIONS
+AP_INVOICES_DISTRIBUTIONS_ALL
+code_combination_id
+dist_code_combination_id
+GL_SETS_OF_BOOKS
+AP_INVOICES_ALL
+set_of_books_id
+set_of_books_id
+GL and AR
+GL_CODE_COMBINATIONS
+RA_CUST_TRX_LINE__GL_DIST_ALL
+code_combination_id
+code_combination_id
+GL and INV
+
+GL_CODE_COMBINATIONS
+MTL_SYSTEM_ITEMS_B
+code_combination_id
+cost_of_sales_account
+GL and PO
+GL_CODE_COMBINATIONS
+PO_DISTRIBUTIONS_ALL
+code_combination_id
+code_combination_id
+
+PO and AP
+PO_DISTRIBUTIONS_ALL
+AP_INVOICE_DISTRIBUTIONS_ALL
+Po_distribution_id
+Po_distribution_id
+PO_VENDORS
+AP_INVOICES_ALL
+vendor_id
+vendor_id
+
+PO and SHIPMENTS
+PO_HEADERS_ALL
+RCV_TRANSACTIONS
+Po_header_id
+Po_header_id
+PO_DISTRIBUTIONS_ALL
+RCV_TRANSACTIONS
+Po_distribution_id
+Po_distribution_id
+SHIPMENTS and AP INVOICE
+RCV_TRANSACTIONS
+AP_INVOICE_DISTRIBUTIONS_ALL
+Rcv_transaction_id
+Rcv_transaction_id
+PO and INV
+PO_REQUISITION_LINES_ALL
+MTL_SYSTEM_ITEMS_B
+item_id
+inventory_item_id
+PO_REQUISITION_LINES_ALL
+MTL_SYSTEM_ITEMS_B
+org_id              
+organization_id
+PO and HRMS
+PO_HEADERS_ALL
+HR_EMPLOYEES
+Agent_id
+employee_id
+PO and REQUISITION
+PO_DISTRIBUTIONS_ALL
+PO_REQ_DISTRIBUTIONS_ALL
+req_distribution_id
+distribution_id
+SHIPMENTS and INV
+RCV_TRANSACTIONS
+MTL_SYSTEM_ITEMS_B
+Organization_id
+Organization_id
+INV and HRMS
+MTL_SYSTEM_ITEMS_B
+HR_EMPLOYEES
+buyer_id
+employee_id
+
+
+
+OM and AR
+OE_ORDER_HEADERS_ALL
+RA_CUSTOMER_TRX_LINES_ALL
+TO_CHAR( Order_number)
+interface_line_attribute1
+OE_ORDER_LINES_ALL
+RA_CUSTOMER_TRX_LINES_ALL
+TO_CHAR(Line_id)
+interface_line_attribute6
+OE_ORDER_LINES_ALL
+RA_CUSTOMER_TRX_LINES_ALL
+reference_customer_trx_line_id
+customer_trx_line_id
+
+
+OM and SHIPPING
+OE_ORDER_HEADERS_ALL
+WSH_DELIVARY_DETAILS
+Header_id
+Source_header_id
+OE_ORDER_LINES_ALL
+WSH_DELIVARY_DETAILS
+Line_id
+Source_line_id
+AP and AR (Banks)
+AR_CASH_RECEIPTS_ALL
+AP_BANK_ACCOUNTS
+Remittance_bank_account_id
+Bank_account_id
+AP and AR
+HZ_PARTIES  
+AP_INVOICES_ALL
+Party_id
+Party_id
+OM and CRM
+OE_ORDER_LINES_ALL
+CSI_ITEM_INSTANCES(Install Base)
+Line_id
+Last_oe_order_line_id
+
+
+
+http://askhareesh.blogspot.com/2014/03/important-join-conditions-between.html

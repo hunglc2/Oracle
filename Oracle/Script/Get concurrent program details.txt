@@ -1,0 +1,19 @@
+SELECT fcr.request_id, 
+         fcpt.user_concurrent_program_name,
+         fcr.phase_code,
+         fcr.status_code,
+         fcr.actual_start_date,
+         fcr.actual_completion_date,
+         fcr.requested_by,
+        (fcr.actual_completion_date - fcr.actual_start_date) * 24 run_time_hrs,
+         fcr.argument_text,
+         fcr.completion_text
+ FROM apps.fnd_concurrent_programs_tl fcpt,
+        apps.fnd_concurrent_requests fcr
+WHERE fcr.concurrent_program_id = fcpt.concurrent_program_id
+  AND fcr.program_application_id = fcpt.application_id
+  AND fcpt.user_concurrent_program_name LIKE '%Program Name%'
+--and fcr.argument_text like '%Text To Find in Arguments to Program%'
+--and request_id = 9999 -- use if you know the request id
+  AND trunc(actual_start_date) > trunc(sysdate-30) -- specify a date
+ORDER BY actual_start_date;

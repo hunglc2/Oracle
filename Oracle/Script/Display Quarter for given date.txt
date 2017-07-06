@@ -1,0 +1,7 @@
+SELECT sysdate
+      ,(CASE WHEN to_char(given_date,'MON') IN ('JUN','JUL','AUG') THEN 'Q1' 
+             WHEN to_char(given_date,'MON') IN ('SEP','OCT','NOV') THEN 'Q2' 
+             WHEN to_char(given_date,'MON') IN ('DEC','JAN','FEB') THEN 'Q3' 
+             WHEN to_char(given_date,'MON') IN ('MAR','APR','MAY') THEN 'Q4'  
+      END) quarter
+FROM dual;

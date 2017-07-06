@@ -1,0 +1,10 @@
+GL_JE_BATCHES (je_batch_id)                                   => GL_JE_HEADERS (je_batch_id)
+GL_JE_HEADERS (je_header_id)                                  => GL_JE_LINES (je_header_id)
+GL_JE_LINES (je_header_id,  je_line_num)                      => GL_IMPORT_REFERENCES (je_header_id, je_line_num)
+GL_IMPORT_REFERENCES (gl_sl_link_table, gl_sl_link_id)        => XLA_AE_LINES (gl_sl_link_table, gl_sl_link_id)
+XLA_AE_LINES (application_id, ae_header_id)                   => XLA_AE_HEADERS (application_id, ae_header_id) 
+XLA_AE_HEADERS (application_id, event_id)                     => XLA_EVENTS (application_id, event_id)   
+XLA_EVENTS (application_id, entity_id)                        => XLA.XLA_TRANSACTION_ENTITIES (application_id, entity_id)
+The source_id_int_1 column of xla.xla_transaction_entities stores the primary_id value for the transactions. You can join the xla.xla_transaction_entities table with the corresponding transactions table for obtaining additional information of the transaction. For e.g you join the xla.xla_transaction_entities table with ra_customer_trx_all for obtaining receivables transactions information or with mtl_material_transactions table for obtaining material transactions information.
+The entity_id mappings can be obtained from the XLA_ENTITY_ID_MAPPINGS table
+[Keywords: gl_import_references, xla_ae_lines, xla_ae_headers, xla_events, drilldown, SLA, XLA]

@@ -1,0 +1,44 @@
+SELECT po.profile_option_name “NAME”,
+po.user_profile_option_name,
+DECODE (TO_CHAR (pov.level_id),
+’10001', ‘SITE’,
+’10002', ‘APP’,
+’10003', ‘RESP’,
+’10005', ‘SERVER’,
+’10006', ‘ORG’,
+’10004', ‘USER’,
+‘******’
+) “LEVEL”,
+DECODE (TO_CHAR (pov.level_id),
+’10001', ”,
+’10002', app.application_short_name,
+’10003', rsp.responsibility_key,
+’10005', svr.node_name,
+’10006', org.NAME,
+’10004', usr.user_name,
+‘******’
+) “CONTEXT”,
+pov.profile_option_value “VALUE”
+
+FROM
+apps.fnd_profile_options_vl po,
+apps.fnd_profile_option_values pov,
+apps.fnd_user usr,
+apps.fnd_application app,
+apps.fnd_responsibility rsp,
+apps.fnd_nodes svr,
+apps.hr_operating_units org
+
+WHERE 1 = 1
+AND pov.application_id = po.application_id
+AND pov.profile_option_id = po.profile_option_id
+AND usr.user_id(+) = pov.level_value
+AND rsp.application_id(+) = pov.level_value_application_id
+AND rsp.responsibility_id(+) = pov.level_value
+AND app.application_id(+) = pov.level_value
+AND svr.node_id(+) = pov.level_value
+AND org.organization_id(+) = pov.level_value
+AND po.profile_option_name like ‘Give profile name’
+–AND po.user_profile_option_name like ‘Give User Profile Name’
+
+ORDER BY “NAME”;

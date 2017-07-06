@@ -1,0 +1,21 @@
+declare n_n number;
+begin
+execute immediate 'select account_list_id from account_list where account_list_id=150' into n_n;
+dbms_output.put_line(n_n);
+end;
+
+
+l_statement := 'BEGIN'
+||' INSERT INTO book_reservations (
+||' res_date
+||' ,res_book_id
+||' )
+||' VALUES (:p_date'
+||' ,:p_book_id'
+||' );'
+||'END;'
+;
+EXECUTE IMMEDIATE l_statement
+USING IN SYSDATE
+,IN p_requested_book_id
+;

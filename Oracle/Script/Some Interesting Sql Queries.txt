@@ -1,0 +1,110 @@
+Query to retrieve 1,4,7,10.....rows from a table
+
+SELECT a.* FROM emp a WHERE (ROWID, 1) IN (SELECT ROWID, MOD (ROWNUM, 3) FROM emp);
+
+
+Query to print Rupees in words 
+
+SELECT sal "Salary ", (' Rs. ' (TO_CHAR (TO_DATE (sal, 'j'), 'Jsp')) ' only.' ) "Sal in Words" FROM emp
+
+
+Query to print the calender for the year
+
+SELECT LPAD (MONTH, 20 - (20 - LENGTH (MONTH)) / 2) MONTH, "Sun", "Mon",
+"Tue", "Wed", "Thu", "Fri", "Sat"
+FROM (SELECT TO_CHAR (dt, 'fmMonthfm YYYY') MONTH,
+TO_CHAR (dt + 1, 'iw') week,
+MAX (DECODE (TO_CHAR (dt, 'd'),
+'1', LPAD (TO_CHAR (dt, 'fmdd'), 2)
+)
+) "Sun",
+MAX (DECODE (TO_CHAR (dt, 'd'),
+'2', LPAD (TO_CHAR (dt, 'fmdd'), 2)
+)
+) "Mon",
+MAX (DECODE (TO_CHAR (dt, 'd'),
+'3', LPAD (TO_CHAR (dt, 'fmdd'), 2)
+)
+) "Tue",
+MAX (DECODE (TO_CHAR (dt, 'd'),
+'4', LPAD (TO_CHAR (dt, 'fmdd'), 2)
+)
+) "Wed",
+MAX (DECODE (TO_CHAR (dt, 'd'),
+'5', LPAD (TO_CHAR (dt, 'fmdd'), 2)
+)
+) "Thu",
+MAX (DECODE (TO_CHAR (dt, 'd'),
+'6', LPAD (TO_CHAR (dt, 'fmdd'), 2)
+)
+) "Fri",
+MAX (DECODE (TO_CHAR (dt, 'd'),
+'7', LPAD (TO_CHAR (dt, 'fmdd'), 2)
+)
+) "Sat"
+FROM (SELECT TRUNC (SYSDATE, 'y') - 1 + ROWNUM dt
+FROM all_objects
+WHERE ROWNUM <= ADD_MONTHS (TRUNC (SYSDATE, 'y'), 12) - TRUNC (SYSDATE, 'y')) GROUP BY TO_CHAR (dt, 'fmMonthfm YYYY'), TO_CHAR (dt + 1, 'iw'))
+ORDER BY TO_DATE (MONTH, 'Month YYYY'), TO_NUMBER (week)
+
+
+Use of Order by clause for records with datatype as character
+
+We generally cannot order the records for a column with character data type. Please use the following trick to use the order clause:
+
+select employee_number from employees
+order by lpad(employee_number,100);
+
+Using the lpad the zeros would be appended and then sql will treat them as numbers and the employee number would be sorted.
+
+
+Printing Fibonacci series in PL/SQL
+
+DECLARE
+RESULT NUMBER := 1;
+previous NUMBER := -1;
+l_sum NUMBER;
+n NUMBER;
+l_in NUMBER := 10;
+BEGIN
+FOR n IN 1 .. l_in
+LOOP
+l_sum := RESULT + previous;
+previous := RESULT;
+RESULT := l_sum;
+DBMS_OUTPUT.put_line (l_sum);
+END LOOP;
+END;
+
+Other ways to print the Fib series is as follows:
+
+CREATE OR REPLACE FUNCTION fib (n POSITIVE) RETURN INTEGER IS
+BEGIN
+IF (n = 1) OR (n = 2) THEN -- terminating condition
+RETURN 1;
+ELSE
+RETURN fib(n - 1) + fib(n - 2); -- recursive call
+END IF;
+END fib;
+
+/
+
+-- Test Fibonacci Series:
+SELECT fib(1), fib(2), fib(3), fib(4), fib(5) FROM dual;
+
+
+Demonstrate simple encoding and decoding of secret messages 
+
+SELECT TRANSLATE(
+'HELLO WORLD', -- Message to encode
+'ABCDEFGHIJKLMNOPQRSTUVWXYZ ',
+'1234567890!@#$%^&*()-=_+;,.') ENCODED_MESSAGE
+FROM DUAL
+/
+
+SELECT TRANSLATE(
+'85@@%._%*@4', -- Message to decode
+'1234567890!@#$%^&*()-=_+;,.',
+'ABCDEFGHIJKLMNOPQRSTUVWXYZ ') DECODED_MESSAGE
+FROM DUAL
+/

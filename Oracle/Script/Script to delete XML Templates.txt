@@ -1,0 +1,31 @@
+﻿declare 
+    p_template_code XDO_TEMPLATES_B.TEMPLATE_CODE%type := 'AC_016' ;
+    p_app_code XDO_TEMPLATES_B.APPLICATION_SHORT_NAME%type := 'INV' ;
+ begin 
+     delete from XDO_TEMPLATES_B where template_code = p_template_code and application_short_name = p_app_code;
+     delete from XDO_TEMPLATES_TL where template_code = p_template_code and application_short_name = p_app_code;
+     delete from xdo_lobs where lob_code = p_template_code and application_short_name = p_app_code;
+     delete from XDO_DS_DEFINITIONS_TL where data_source_code = p_template_code and application_short_name = p_app_code;
+     delete from XDO_DS_DEFINITIONS_b where data_source_code = p_template_code and application_short_name = p_app_code;
+     DBMS_OUTPUT.put_line ('Total Rows Deleted ' || SQL%ROWCOUNT);
+     COMMIT;
+     EXCEPTION
+       WHEN OTHERS
+           THEN
+              DBMS_OUTPUT.put_line ('Error ' || SQLERRM);
+ end;
+
+
+----------------------------------------------------------------------------
+
+declare p_template_code XDO_TEMPLATES_B.template_code%type := 'XXGRREP' ;
+ begin 
+	 delete from XDO_TEMPLATES_B where template_code = :p_template_code 
+	 delete from XDO_TEMPLATES_TL where template_code = :p_template_code 
+	 delete from xdo_lobs where lob_code = :p_template_code 
+	 delete from XDO_DS_DEFINITIONS_TL where data_source_code = :p_template_code 
+	 delete from XDO_DS_DEFINITIONS_b where data_source_code = :p_template_code 
+ end;
+
+Original from: http://askhareesh.blogspot.in/2014/09/xml-publisher-template-and-data-definition-deletion.html
+Copyright © 2014 Hareesh Pothuguntla - All Rights Reserved

@@ -1,0 +1,47 @@
+SELECT fcr.request_id
+      ,u.user_name                          requestor
+      ,fcp.user_concurrent_program_name
+      ,decode(fcr.phase_code,'R', 'Running'
+                            ,'C', 'Completed'
+                            ,'P', 'Pending'
+                            ,fcr.phase_code)  phase_code 
+      ,decode(fcr.status_code,'T', 'Terminating'
+                             ,'X', 'Terminated'
+                             ,'C', 'Normal'
+                             ,'I', 'Scheduled'
+                             ,'R', 'Normal'
+                             ,'G', 'Warning'
+                             ,'W', 'Paused'
+                             ,fcr.status_code) status_code
+      ,fcr.argument_text 
+      --,fcr.logfile_node_name
+      --,fcr.nls_language
+      --,fcr.nls_territory
+      ,r.responsibility_name  
+      --,fcr.controlling_manager
+      ,vs.sid                                   session_id
+      ,To_Char(actual_start_date,'DD-MON-YYYY HH24:MI:SS')      actual_start_date
+      ,To_Char(actual_completion_date,'DD-MON-YYYY HH24:MI:SS') actual_completion_date
+      ,Round( (((Nvl(actual_completion_date,sysdate) - actual_start_date) * 86400)+(Nvl(actual_completion_date,sysdate) - actual_start_date))/60,2)   diff
+      ,fe.execution_file_name
+      ,fcr.requested_start_date
+  FROM fnd_concurrent_requests    fcr
+      ,fnd_concurrent_programs_vl fcp
+      ,fnd_responsibility_vl      r
+      ,v$session                  vs
+      ,fnd_executables            fe
+      ,fnd_user                   u
+ WHERE 1=1
+   AND fcp.concurrent_program_id           = fcr.concurrent_program_id
+   AND u.user_id                           = fcr.requested_by 
+   AND r.responsibility_id                 = fcr.responsibility_id
+   AND vs.audsid(+)                        = fcr.oracle_session_id
+   AND fe.executable_id                    = fcp.executable_id 
+   --AND fcp.user_concurrent_program_name LIKE :user_concurrent_program
+   --AND fcr.request_id                    = :request_id 
+   AND u.user_name                        LIKE :user_name
+--  AND fcr.phase_code                     = 'R'
+--  AND fcr.status_code                    = 'E'
+--  AND fcr.request_id BETWEEN :start_request_id and :end_request_id
+--  AND r.responsibility_name            LIKE :responsibility_name 
+ORDER BY fcr.actual_start_date DESC

@@ -1,0 +1,15 @@
+DECLARE
+  t account_list%RowType;
+  CURSOR cc
+  IS
+    SELECT * FROM account_list;
+BEGIN
+  OPEN cc;
+  LOOP
+    FETCH cc INTO t;
+    dbms_output.put_line(t.account_list_id);
+    EXIT
+  WHEN cc%notfound;
+  END LOOP;
+  CLOSE cc;
+END;

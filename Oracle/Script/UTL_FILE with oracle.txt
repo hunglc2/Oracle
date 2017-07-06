@@ -1,0 +1,67 @@
+Get the directory path from
+?
+1
+2
+3
+select *
+from v$parameter
+where name like 'utl%'  --Value
+
+UTL_FILE Example:
+?
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+DECLARE
+   v_file_handler   UTL_FILE.FILE_TYPE;
+   v_txt_line1      VARCHAR2 (1000)
+                       := 'write a line to a file using UTL_FILE';
+   v_txt_line2      VARCHAR2 (1000)
+                       := 'askHareesh blog for Oracle Applications';
+   v_file_name      VARCHAR2 (50) := 'Outfile.txt';
+BEGIN
+   --Open the file in Write mode
+   v_file_handler :=
+      UTL_FILE.FOPEN (
+         '/u01/oratest/db/tech_st/11.1.0/appsutil/outbound/VIS_test',
+         v_file_name,
+         'W');
+   --Write to the file
+   UTL_FILE.Put_LINE (v_file_handler, v_txt_line1);
+   UTL_FILE.Put_LINE (v_file_handler, v_txt_line2);
+ 
+   --Close the file
+   IF UTL_FILE.IS_OPEN (v_file_handler)
+   THEN
+      UTL_FILE.FCLOSE (v_file_handler);
+   END IF;
+EXCEPTION
+   WHEN OTHERS
+   THEN
+      raise_application_error (-20099, 'Unknown Error' || SQLERRM);
+END;

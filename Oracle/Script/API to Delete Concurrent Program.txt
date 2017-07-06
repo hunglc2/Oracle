@@ -1,0 +1,18 @@
+﻿Begin
+fnd_program.delete_program('program short name','schema');
+fnd_program.delete_executable('program short name','schema');
+commit;
+End; 
+
+
+------
+
+fnd_program.delete_program('AC_016','INV');
+--fnd_program.delete_executable('program short name','schema');
+DBMS_OUTPUT.put_line ('Total Rows Deleted ' || SQL%ROWCOUNT);
+     COMMIT;
+     EXCEPTION
+       WHEN OTHERS
+           THEN
+              DBMS_OUTPUT.put_line ('Error ' || SQLERRM);
+End; 

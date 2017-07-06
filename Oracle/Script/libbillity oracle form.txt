@@ -1,0 +1,8 @@
+vao`: run -> regedit -> HKEY_LOCAL_MACHINE -> SOFTWARE -> Wow6432Node -> ORACLE -> KEY_DevsuiteHome1 -> tim` Forms Patch
+rồi thêm cái đường dẫn chứa thư viện của mày để adđ zo. 
+C:\DevSuiteHome_1\cgenf61\admin; đây là đường dẫn ban đầu
+sau khi thêm 
+C:\DevSuiteHome_1\cgenf61\admin;C:\DevSuiteHome_1\forms;E:\OracleForm\lib oracle\forms\US;E:\OracleForm\lib oracle\resource
+nhấn Ok. sau đó restart hay sao đó.
+[11/30/2014 9:40:48 AM] Lê Công Hùng: C:\DevSuiteHome_1\cgenf61\admin;C:\DevSuiteHome_1\forms;E:\OracleForm\lib oracle\forms\US;E:\OracleForm\lib oracle\resource
+[11/30/2014 9:40:59 AM] Lê Công Hùng: thêm 4 cái nayy2 vào form patch luon ha

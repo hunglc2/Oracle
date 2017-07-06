@@ -1,0 +1,26 @@
+CREATE PROCEDURE CELL_ID_STAT
+IS
+   lc_sql   varchar2 (20000);
+BEGIN
+ 
+--UMTS_TERMINALS
+  FOR r_cur in (select count(distinct replace(m.served_imei, ' ', '')) stevilo, cell_id
+                  from tmp_records m, tac_list sl
+                 where sl.tac = substr(replace(m.served_imei, ' ', ''), 1, 8 )
+                   and sl.band like '%VIII%'
+                   and m.location_information like 'CI 262 40%'
+                   group by cell_id
+                  ) LOOP
+         
+       UPDATE cell_id_statistics cs SET cs.UMTS_900_TERMINALS = r_cur.stevilo
+        WHERE cs.cell_id = r_cur.cell_id;
+  
+  END LOOP;
+ 
+   COMMIT;
+EXCEPTION
+   WHEN OTHERS
+   THEN
+      ROLLBACK;
+END CELL_ID_STAT;
+http://sql-tuning.com/using-for-statement-with-sql/

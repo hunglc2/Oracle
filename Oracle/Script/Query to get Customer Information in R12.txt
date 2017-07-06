@@ -1,0 +1,43 @@
+select  distinct
+        hp.party_name "Customer Name",
+        hca.account_number,
+        hca.status,
+        hcsu.location,
+        hcsu.site_use_code,
+        hcsu.status loc_stat,
+        ps.class,
+        hcsu.site_use_id,
+        hcpc.name profile_name,
+        hl.address1,
+        hl.address2,
+        hl.address3,
+        hl.city,
+        hl.state,
+        hl.postal_code,
+        ps.customer_id,
+        ps.customer_site_use_id,
+        hps.identifying_address_flag,
+        ps.trx_date,
+        HOU.NAME "Operating Unit"
+from    apps.hz_parties hp,
+        apps.hz_party_sites hps,
+        apps.hz_locations hl,
+        apps.hz_cust_accounts hca,
+        apps.hz_cust_acct_sites hcas,
+        apps.hz_cust_site_uses hcsu,
+        apps.hz_customer_profiles hcp,
+        apps.hz_cust_profile_classes hcpc,
+        apps.ar_payment_schedules_all ps,
+        apps.hr_operating_units hou
+where   hp.party_id = hca.party_id(+)
+        and hp.party_id = hcp.party_id
+        and hp.party_id = hps.party_id
+        and hps.party_site_id = hcas.party_site_id
+        and hps.location_id = hl.location_id
+        and hca.cust_account_id = hcas.cust_account_id
+        and hcas.cust_acct_site_id = hcsu.cust_acct_site_id
+        and hca.cust_account_id = hcp.cust_account_id
+        and hca.cust_account_id = ps.customer_id
+        and hcp.profile_class_id = hcpc.profile_class_id
+        and ps.customer_site_use_id = hcsu.site_use_id
+        and hcsu.org_id = hou.organization_id;

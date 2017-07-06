@@ -1,0 +1,16 @@
+DECLARE
+  c_c sys_refcursor;
+  str VARCHAR2(1000);
+Type t_t
+IS
+  TABLE OF account_list%RowType;
+  t t_t;
+BEGIN
+  str := 'select * from account_list where rownum < 4';
+  OPEN c_c FOR str;
+  FETCH c_c bulk collect INTO t;
+  FOR i IN 1..t.count
+  LOOP
+    dbms_output.put_line(t(i).account_list_id);
+  END LOOP;
+END; 

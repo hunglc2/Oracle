@@ -1,0 +1,16 @@
+DECLARE
+Type t_list
+IS
+  TABLE OF account_list%RowType;
+  l_list t_list;
+  CURSOR c_c
+  IS
+    SELECT * FROM account_list;
+BEGIN
+  OPEN c_c;
+  FETCH c_c bulk collect INTO l_list;
+  for i in 1..l_list.count
+  loop
+    dbms_output.put_line(l_list(i).account_list_id);
+  end loop;
+END;

@@ -1,0 +1,11 @@
+SELECT hp.party_id,
+  hp.person_first_name,
+  hp.person_last_name,
+  hp.party_name,
+  APS.VENDOR_NAME,
+  hcpp.email_address,
+  hcpp.phone_number
+FROM hz_parties hp,
+  hz_contact_points hcpp,
+  AP_SUPPLIERS APS
+WHERE HP.PARTY_ID=APS.PARTY_ID AND hcpp.owner_table_name(+) = 'HZ_PARTIES'
