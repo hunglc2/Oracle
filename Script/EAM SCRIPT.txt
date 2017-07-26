@@ -1,0 +1,539 @@
+SELECT cii.rowid row_id,
+       msn.inventory_item_id,
+       msn.serial_number,
+       nvl(cii.instance_description, msn.descriptive_text) as descriptive_text,
+       cii.inv_subinventory_name current_subinventory_code,
+       cii.inv_locator_id as current_locator_id,
+       nvl(cii.network_asset_flag, 'N') network_asset_flag,
+       cii.context,
+       cii.attribute1,
+       cii.attribute2,
+       cii.attribute3,
+       cii.attribute4,
+       cii.attribute5,
+       cii.attribute6,
+       cii.attribute7,
+       cii.attribute8,
+       cii.attribute9,
+       cii.attribute10,
+       cii.attribute11,
+       cii.attribute12,
+       cii.attribute13,
+       cii.attribute14,
+       cii.attribute15,
+       cii.attribute16,
+       cii.attribute17,
+       cii.attribute18,
+       cii.attribute19,
+       cii.attribute20,
+       cii.attribute21,
+       cii.attribute22,
+       cii.attribute23,
+       cii.attribute24,
+       cii.attribute25,
+       cii.attribute26,
+       cii.attribute27,
+       cii.attribute28,
+       cii.attribute29,
+       cii.attribute30,
+       mp.maint_organization_id current_organization_id,
+       mp.organization_code inv_organization_code,
+       msi.concatenated_segments,
+       msi.eam_item_type,
+       msi.description asset_group_description,
+       cii.category_id category_id,
+       mck.concatenated_segments category_name,
+       mct.description category_description,
+       cii.pn_location_id pn_location_id,
+       pl.building || pl.floor || pl.office pn_location_name,
+       pl.location_code pn_location_code,
+       cii.asset_criticality_code asset_criticality_code,
+       ml1.meaning asset_criticality,
+       eomd.accounting_class_code wip_accounting_class_code,
+       nvl(cii.maintainable_flag, 'N') maintainable_flag,
+       eomd.area_id,
+       el.location_codes area,
+       eomd.owning_department_id,
+       bd.department_code owning_department,
+       mp_prod.organization_code prod_organization_code,
+       msn_prod.current_organization_id prod_organization_id,
+       msi_prod.inventory_item_id equipment_item_id,
+       decode(msi_prod.equipment_type,
+              null,
+              null,
+              1,
+              msn_prod.serial_number,
+              null) eqp_serial_number,
+       msn_prod.gen_object_id equipment_gen_object_id,
+       cia.fa_asset_id,
+       fa.asset_category_id,
+       fa.asset_number fa_asset_number,
+       msn_parent.inventory_item_id parent_item_id,
+       msn_parent.serial_number parent_serial_number,
+       msn_parent.gen_object_id parent_gen_object_id,
+       cii2.instance_number parent_instance_number,
+       cii.serial_number maintained_unit,
+       cii.instance_number,
+       nvl(cii.last_vld_organization_id, msn.current_organization_id) inv_organization_id,
+       3 maintenance_object_type,
+       cii.instance_id maintenance_object_id,
+       msn.gen_object_id,
+       msn.current_status,
+       cii.location_type_code,
+       cii.location_id,
+       decode(cii.location_type_code,
+              'HZ_PARTY_SITES',
+              (SELECT hz.address1 || ',' || hz.address2 || ',' || hz.address3 || ',' ||
+                      hz.address4 || ',' || hz.city || ',' || hz.state || ',' ||
+                      hz.postal_code || ',' || hz.country
+                 FROM hz_locations hz, hz_party_sites hps
+                WHERE hz.location_id = hps.location_id
+                  and hps.party_site_id = cii.location_id),
+              'HZ_LOCATIONS',
+              (SELECT hz.address1 || ',' || hz.address2 || ',' || hz.address3 || ',' ||
+                      hz.address4 || ',' || hz.city || ',' || hz.state || ',' ||
+                      hz.postal_code || ',' || hz.country
+                 FROM hz_locations hz
+                WHERE hz.location_id = cii.location_id),
+              'VENDOR_SITE',
+              (SELECT pvs.address_line1 || ',' || pvs.address_line2 || ',' ||
+                      pvs.address_line3 || ',' || pvs.city || ',' ||
+                      pvs.state || ',' || pvs.zip || ',' || pvs.country
+                 FROM po_vendor_sites_all pvs
+                WHERE pvs.vendor_site_id = cii.location_id),
+              'INVENTORY',
+              (SELECT hrl.address_line_1 || ',' || hrl.address_line_2 || ',' ||
+                      hrl.address_line_3 || ',' || hrl.region_1 || ',' ||
+                      hrl.postal_code || ',' || hrl.country
+                 FROM hr_locations_all hrl
+                WHERE hrl.location_id = cii.location_id),
+              'INTERNAL_SITE',
+              (SELECT hrl.address_line_1 || ',' || hrl.address_line_2 || ',' ||
+                      hrl.address_line_3 || ',' || hrl.region_1 || ',' ||
+                      hrl.postal_code || ',' || hrl.country
+                 FROM hr_locations_all hrl
+                WHERE hrl.location_id = cii.location_id),
+              'WIP',
+              (SELECT hz.address1 || ',' || hz.address2 || ',' || hz.address3 || ',' ||
+                      hz.address4 || ',' || hz.city || ',' || hz.state || ',' ||
+                      hz.postal_code || ',' || hz.country
+                 FROM hz_locations hz
+                WHERE hz.location_id = cii.location_id),
+              'PROJECT',
+              (SELECT hz.address1 || ',' || hz.address2 || ',' || hz.address3 || ',' ||
+                      hz.address4 || ',' || hz.city || ',' || hz.state || ',' ||
+                      hz.postal_code || ',' || hz.country
+                 FROM hz_locations hz
+                WHERE hz.location_id = cii.location_id),
+              'IN_TRANSIT',
+              (SELECT hz.address1 || ',' || hz.address2 || ',' || hz.address3 || ',' ||
+                      hz.address4 || ',' || hz.city || ',' || hz.state || ',' ||
+                      hz.postal_code || ',' || hz.country
+                 FROM hz_locations hz
+                WHERE hz.location_id = cii.location_id),
+              'PO',
+              (SELECT hz.address1 || ',' || hz.address2 || ',' || hz.address3 || ',' ||
+                      hz.address4 || ',' || hz.city || ',' || hz.state || ',' ||
+                      hz.postal_code || ',' || hz.country
+                 from hz_locations hz
+                where hz.location_id = cii.location_id),
+              null) current_location,
+       cii.CREATED_BY,
+       cii.CREATION_DATE,
+       cii.LAST_UPDATED_BY,
+       cii.LAST_UPDATE_DATE,
+       cii.LAST_UPDATE_LOGIN,
+       cii.supplier_warranty_exp_date,
+       cii.checkin_status,
+       cii.operational_log_flag,
+       ml2.meaning current_status_meaning,
+       cii.active_start_date,
+       cii.active_end_date,
+       cia.fa_sync_flag,
+       msn_parent.current_organization_id parent_organization_id,
+       CSI_GIS_INSTANCE_LOC_UTL_PKG.GET_DEGREES_FROM_DD(GEO.INST_LATITUDE) LAT_DEGREES,
+       CSI_GIS_INSTANCE_LOC_UTL_PKG.GET_MINUTES_FROM_DD(GEO.INST_LATITUDE) LAT_MINUTES,
+       CSI_GIS_INSTANCE_LOC_UTL_PKG.GET_SECONDS_FROM_DD(GEO.INST_LATITUDE) LAT_SECONDS,
+       CSI_GIS_INSTANCE_LOC_UTL_PKG.GET_DIRECTION_FROM_DD('LAT',
+                                                          GEO.INST_LATITUDE) LAT_DIRECTION,
+       CSI_GIS_INSTANCE_LOC_UTL_PKG.GET_DEGREES_FROM_DD(GEO.INST_LONGITUDE) LONG_DEGREES,
+       CSI_GIS_INSTANCE_LOC_UTL_PKG.GET_MINUTES_FROM_DD(GEO.INST_LONGITUDE) LONG_MINUTES,
+       CSI_GIS_INSTANCE_LOC_UTL_PKG.GET_SECONDS_FROM_DD(GEO.INST_LONGITUDE) LONG_SECONDS,
+       CSI_GIS_INSTANCE_LOC_UTL_PKG.GET_DIRECTION_FROM_DD('LON',
+                                                          GEO.INST_LONGITUDE) LONG_DIRECTION,
+       SAF.EAM_SAFETY_TYPE safety_type,
+       SAF.OPERATING_POSITION OPERATING_POSITION,
+       (SELECT meaning
+          FROM MFG_LOOKUPS
+         WHERE lookup_code = SAF.OPERATING_POSITION
+           AND lookup_type = 'EAM_TAG_POSITIONS') OPERATING_POSITION_DISP,
+       SAF.OPERATING_TAG OPERATING_TAG,
+       (SELECT meaning
+          FROM MFG_LOOKUPS
+         WHERE lookup_code = SAF.OPERATING_TAG
+           AND lookup_type = 'EAM_SAFETY_TAGS') OPERATING_TAG_DISP,
+       SAF.SHUTDOWN_POSITION SHUTDOWN_POSITION,
+       (SELECT meaning
+          FROM MFG_LOOKUPS
+         WHERE lookup_code = SAF.SHUTDOWN_POSITION
+           AND lookup_type = 'EAM_TAG_POSITIONS') SHUTDOWN_POSITION_DISP,
+       SAF.SHUTDOWN_TAG SHUTDOWN_TAG,
+       (SELECT meaning
+          FROM MFG_LOOKUPS
+         WHERE lookup_code = SAF.SHUTDOWN_TAG
+           AND lookup_type = 'EAM_SAFETY_TAGS') SHUTDOWN_TAG_DISP,
+       SAF.POS_LOCKOUT_DEVICE POS_LOCKOUT_DEVICE,
+       (SELECT meaning
+          FROM MFG_LOOKUPS
+         WHERE lookup_code = SAF.POS_LOCKOUT_DEVICE
+           AND lookup_type = 'EAM_LOCKOUT_DEVICE') POS_LOCKOUT_DEVICE_DISP,
+       SAF.LOCKOUT_DEVICE LOCKOUT_DEVICE,
+       (SELECT meaning
+          FROM MFG_LOOKUPS
+         WHERE lookup_code = SAF.LOCKOUT_DEVICE
+           AND lookup_type = 'EAM_LOCKOUT_DEVICE') LOCKOUT_DEVICE_DISP,
+       DECODE(cii.location_type_code,
+              'HZ_LOCATIONS',
+              (SELECT hz.clli_code
+                 FROM hz_locations hz
+                WHERE hz.location_id = cii.location_id),
+              NULL) LOCATION_CODE,
+       nvl(cii.LINEAR_ASSET, 'N') LINEAR_ASSET_FLAG,
+       cii.INSTANCE_STATUS_ID INSTANCE_STATUS_ID,
+       cis.NAME INSTANCE_STATUS,
+       cii.OBJECT_VERSION_NUMBER,
+       cii.ESRI_FEATURE,
+       cii.route_layer_id
+  FROM mtl_parameters         mp,
+       csi_item_instances     cii,
+       eam_org_maint_defaults eomd,
+       csi_i_assets           cia,
+       mfg_lookups            ml1,
+       bom_departments        bd,
+       pn_locations_all       pl,
+       mtl_eam_locations      el,
+       mtl_categories_kfv     mck,
+       mtl_categories_tl      mct,
+       mtl_system_items_b_kfv msi,
+       mtl_system_items       msi_prod,
+       mtl_serial_numbers     msn_prod,
+       mtl_parameters         mp_prod,
+       fa_additions_b         fa,
+       mtl_object_genealogy   mog,
+       mtl_serial_numbers     msn,
+       mtl_serial_numbers     msn_parent,
+       csi_item_instances     cii2,
+       mfg_lookups            ml2,
+       CSI_II_GEOLOCATIONS    GEO,
+       EAM_ASSET_SAFETY_TYPES SAF,
+       csi_instance_statuses  cis
+ WHERE mp.organization_id = msn.current_organization_id
+   AND msn.current_organization_id = msi.organization_id
+   AND msi.inventory_item_id = msn.inventory_item_id
+   AND msi.eam_item_type in (1, 3)
+   AND msi.serial_number_control_code <> 1
+   AND msn.inventory_item_id = cii.inventory_item_id
+   AND msn.serial_number = cii.serial_number
+   AND msn.gen_object_id = mog.object_id(+)
+   AND cii.instance_id = eomd.object_id(+)
+   AND eomd.object_type = 50
+   AND (eomd.organization_id = mp.maint_organization_id)
+   AND cii.asset_criticality_code = ml1.lookup_code(+)
+   AND ml1.lookup_type(+) = 'MTL_EAM_ASSET_CRITICALITY'
+   AND eomd.owning_department_id = bd.department_id(+)
+   AND cii.pn_location_id = pl.location_id(+)
+   AND SYSDATE >= nvl(PL.ACTIVE_START_DATE(+), sysdate)
+   AND SYSDATE <= nvl(PL.ACTIVE_END_DATE(+), sysdate)
+   AND eomd.area_id = el.location_id(+)
+   AND cii.category_id = mck.category_id(+)
+   AND cii.equipment_gen_object_id = msn_prod.gen_object_id(+)
+   AND msn_prod.current_organization_id = msi_prod.organization_id(+)
+   AND msn_prod.inventory_item_id = msi_prod.inventory_item_id(+)
+   AND msi_prod.organization_id = mp_prod.organization_id(+)
+   AND msi_prod.equipment_type(+) = 1
+   AND cii.instance_id = cia.instance_id(+)
+   AND cia.fa_asset_id = fa.asset_id(+)
+   AND CII.INSTANCE_ID = GEO.INSTANCE_ID(+)
+   AND GEO.VALID_FLAG(+) = 'Y'
+   AND CII.INSTANCE_ID = SAF.INSTANCE_ID(+)
+   AND sysdate >= nvl(cia.active_start_date(+), sysdate)
+   AND sysdate <= nvl(cia.active_end_date(+), sysdate)
+   AND mog.parent_object_id = msn_parent.gen_object_id(+)
+   AND mog.genealogy_type(+) = 5
+   AND sysdate >= nvl(mog.start_date_active(+), sysdate)
+   AND sysdate <= nvl(mog.end_date_active(+), sysdate)
+   AND msn_parent.inventory_item_id = cii2.inventory_item_id(+)
+   AND msn_parent.serial_number = cii2.serial_number(+)
+   AND ml2.lookup_type(+) = 'SERIAL_NUM_STATUS'
+   AND ml2.lookup_code(+) = MSN.CURRENT_STATUS
+   AND cii.INSTANCE_STATUS_ID = cis.INSTANCE_STATUS_ID
+   AND mck.category_id = mct.category_id(+)
+   AND mct.language(+) = userenv('LANG')
+UNION ALL
+SELECT cii.rowid row_id,
+       msn.inventory_item_id,
+       msn.serial_number,
+       nvl(cii.instance_description, msn.descriptive_text) as descriptive_text,
+       cii.inv_subinventory_name current_subinventory_code,
+       cii.inv_locator_id as current_locator_id,
+       nvl(cii.network_asset_flag, 'N') network_asset_flag,
+       cii.context,
+       cii.attribute1,
+       cii.attribute2,
+       cii.attribute3,
+       cii.attribute4,
+       cii.attribute5,
+       cii.attribute6,
+       cii.attribute7,
+       cii.attribute8,
+       cii.attribute9,
+       cii.attribute10,
+       cii.attribute11,
+       cii.attribute12,
+       cii.attribute13,
+       cii.attribute14,
+       cii.attribute15,
+       cii.attribute16,
+       cii.attribute17,
+       cii.attribute18,
+       cii.attribute19,
+       cii.attribute20,
+       cii.attribute21,
+       cii.attribute22,
+       cii.attribute23,
+       cii.attribute24,
+       cii.attribute25,
+       cii.attribute26,
+       cii.attribute27,
+       cii.attribute28,
+       cii.attribute29,
+       cii.attribute30,
+       mp.maint_organization_id current_organization_id,
+       mp.organization_code inv_organization_code,
+       msi.concatenated_segments,
+       msi.eam_item_type,
+       msi.description asset_group_description,
+       cii.category_id category_id,
+       mck.concatenated_segments category_name,
+       mct.description category_description,
+       cii.pn_location_id pn_location_id,
+       pl.building || pl.floor || pl.office pn_location_name,
+       pl.location_code pn_location_code,
+       cii.asset_criticality_code asset_criticality_code,
+       ml1.meaning asset_criticality,
+       null wip_accounting_class_code,
+       nvl(cii.maintainable_flag, 'N') maintainable_flag,
+       null,
+       null area,
+       null,
+       null owning_department,
+       mp_prod.organization_code prod_organization_code,
+       msn_prod.current_organization_id prod_organization_id,
+       msi_prod.inventory_item_id equipment_item_id,
+       decode(msi_prod.equipment_type,
+              null,
+              null,
+              1,
+              msn_prod.serial_number,
+              null) eqp_serial_number,
+       msn_prod.gen_object_id equipment_gen_object_id,
+       cia.fa_asset_id,
+       fa.asset_category_id,
+       fa.asset_number fa_asset_number,
+       msn_parent.inventory_item_id parent_item_id,
+       msn_parent.serial_number parent_serial_number,
+       msn_parent.gen_object_id parent_gen_object_id,
+       cii2.instance_number parent_instance_number,
+       cii.serial_number maintained_unit,
+       cii.instance_number,
+       nvl(cii.last_vld_organization_id, msn.current_organization_id) inv_organization_id,
+       3 maintenance_object_type,
+       cii.instance_id maintenance_object_id,
+       msn.gen_object_id,
+       msn.current_status,
+       cii.location_type_code,
+       cii.location_id,
+       decode(cii.location_type_code,
+              'HZ_PARTY_SITES',
+              (SELECT hz.address1 || ',' || hz.address2 || ',' || hz.address3 || ',' ||
+                      hz.address4 || ',' || hz.city || ',' || hz.state || ',' ||
+                      hz.postal_code || ',' || hz.country
+                 FROM hz_locations hz, hz_party_sites hps
+                WHERE hz.location_id = hps.location_id
+                  and hps.party_site_id = cii.location_id),
+              'HZ_LOCATIONS',
+              (SELECT hz.address1 || ',' || hz.address2 || ',' || hz.address3 || ',' ||
+                      hz.address4 || ',' || hz.city || ',' || hz.state || ',' ||
+                      hz.postal_code || ',' || hz.country
+                 FROM hz_locations hz
+                WHERE hz.location_id = cii.location_id),
+              'VENDOR_SITE',
+              (SELECT pvs.address_line1 || ',' || pvs.address_line2 || ',' ||
+                      pvs.address_line3 || ',' || pvs.city || ',' ||
+                      pvs.state || ',' || pvs.zip || ',' || pvs.country
+                 FROM po_vendor_sites_all pvs
+                WHERE pvs.vendor_site_id = cii.location_id),
+              'INVENTORY',
+              (SELECT hrl.address_line_1 || ',' || hrl.address_line_2 || ',' ||
+                      hrl.address_line_3 || ',' || hrl.region_1 || ',' ||
+                      hrl.postal_code || ',' || hrl.country
+                 FROM hr_locations_all hrl
+                WHERE hrl.location_id = cii.location_id),
+              'INTERNAL_SITE',
+              (SELECT hrl.address_line_1 || ',' || hrl.address_line_2 || ',' ||
+                      hrl.address_line_3 || ',' || hrl.region_1 || ',' ||
+                      hrl.postal_code || ',' || hrl.country
+                 FROM hr_locations_all hrl
+                WHERE hrl.location_id = cii.location_id),
+              'WIP',
+              (SELECT hz.address1 || ',' || hz.address2 || ',' || hz.address3 || ',' ||
+                      hz.address4 || ',' || hz.city || ',' || hz.state || ',' ||
+                      hz.postal_code || ',' || hz.country
+                 FROM hz_locations hz
+                WHERE hz.location_id = cii.location_id),
+              'PROJECT',
+              (SELECT hz.address1 || ',' || hz.address2 || ',' || hz.address3 || ',' ||
+                      hz.address4 || ',' || hz.city || ',' || hz.state || ',' ||
+                      hz.postal_code || ',' || hz.country
+                 FROM hz_locations hz
+                WHERE hz.location_id = cii.location_id),
+              'IN_TRANSIT',
+              (SELECT hz.address1 || ',' || hz.address2 || ',' || hz.address3 || ',' ||
+                      hz.address4 || ',' || hz.city || ',' || hz.state || ',' ||
+                      hz.postal_code || ',' || hz.country
+                 FROM hz_locations hz
+                WHERE hz.location_id = cii.location_id),
+              'PO',
+              (SELECT hz.address1 || ',' || hz.address2 || ',' || hz.address3 || ',' ||
+                      hz.address4 || ',' || hz.city || ',' || hz.state || ',' ||
+                      hz.postal_code || ',' || hz.country
+                 from hz_locations hz
+                where hz.location_id = cii.location_id),
+              null) current_location,
+       cii.CREATED_BY,
+       cii.CREATION_DATE,
+       cii.LAST_UPDATED_BY,
+       cii.LAST_UPDATE_DATE,
+       cii.LAST_UPDATE_LOGIN,
+       cii.supplier_warranty_exp_date,
+       cii.checkin_status,
+       cii.operational_log_flag,
+       ml2.meaning current_status_meaning,
+       cii.active_start_date,
+       cii.active_end_date,
+       cia.fa_sync_flag,
+       msn_parent.current_organization_id parent_organization_id,
+       CSI_GIS_INSTANCE_LOC_UTL_PKG.GET_DEGREES_FROM_DD(GEO.INST_LATITUDE) LAT_DEGREES,
+       CSI_GIS_INSTANCE_LOC_UTL_PKG.GET_MINUTES_FROM_DD(GEO.INST_LATITUDE) LAT_MINUTES,
+       CSI_GIS_INSTANCE_LOC_UTL_PKG.GET_SECONDS_FROM_DD(GEO.INST_LATITUDE) LAT_SECONDS,
+       CSI_GIS_INSTANCE_LOC_UTL_PKG.GET_DIRECTION_FROM_DD('LAT',
+                                                          GEO.INST_LATITUDE) LAT_DIRECTION,
+       CSI_GIS_INSTANCE_LOC_UTL_PKG.GET_DEGREES_FROM_DD(GEO.INST_LONGITUDE) LONG_DEGREES,
+       CSI_GIS_INSTANCE_LOC_UTL_PKG.GET_MINUTES_FROM_DD(GEO.INST_LONGITUDE) LONG_MINUTES,
+       CSI_GIS_INSTANCE_LOC_UTL_PKG.GET_SECONDS_FROM_DD(GEO.INST_LONGITUDE) LONG_SECONDS,
+       CSI_GIS_INSTANCE_LOC_UTL_PKG.GET_DIRECTION_FROM_DD('LON',
+                                                          GEO.INST_LONGITUDE) LONG_DIRECTION,
+       SAF.EAM_SAFETY_TYPE safety_type,
+       SAF.OPERATING_POSITION OPERATING_POSITION,
+       (SELECT meaning
+          FROM MFG_LOOKUPS
+         WHERE lookup_code = SAF.OPERATING_POSITION
+           AND lookup_type = 'EAM_TAG_POSITIONS') OPERATING_POSITION_DISP,
+       SAF.OPERATING_TAG OPERATING_TAG,
+       (SELECT meaning
+          FROM MFG_LOOKUPS
+         WHERE lookup_code = SAF.OPERATING_TAG
+           AND lookup_type = 'EAM_SAFETY_TAGS') OPERATING_TAG_DISP,
+       SAF.SHUTDOWN_POSITION SHUTDOWN_POSITION,
+       (SELECT meaning
+          FROM MFG_LOOKUPS
+         WHERE lookup_code = SAF.SHUTDOWN_POSITION
+           AND lookup_type = 'EAM_TAG_POSITIONS') SHUTDOWN_POSITION_DISP,
+       SAF.SHUTDOWN_TAG SHUTDOWN_TAG,
+       (SELECT meaning
+          FROM MFG_LOOKUPS
+         WHERE lookup_code = SAF.SHUTDOWN_TAG
+           AND lookup_type = 'EAM_SAFETY_TAGS') SHUTDOWN_TAG_DISP,
+       SAF.POS_LOCKOUT_DEVICE POS_LOCKOUT_DEVICE,
+       (SELECT meaning
+          FROM MFG_LOOKUPS
+         WHERE lookup_code = SAF.POS_LOCKOUT_DEVICE
+           AND lookup_type = 'EAM_LOCKOUT_DEVICE') POS_LOCKOUT_DEVICE_DISP,
+       SAF.LOCKOUT_DEVICE LOCKOUT_DEVICE,
+       (SELECT meaning
+          FROM MFG_LOOKUPS
+         WHERE lookup_code = SAF.LOCKOUT_DEVICE
+           AND lookup_type = 'EAM_LOCKOUT_DEVICE') LOCKOUT_DEVICE_DISP,
+       DECODE(cii.location_type_code,
+              'HZ_LOCATIONS',
+              (SELECT hz.clli_code
+                 FROM hz_locations hz
+                WHERE hz.location_id = cii.location_id),
+              NULL) LOCATION_CODE,
+       nvl(cii.LINEAR_ASSET, 'N') LINEAR_ASSET_FLAG,
+       cii.INSTANCE_STATUS_ID,
+       cis.NAME INSTANCE_STATUS,
+       cii.OBJECT_VERSION_NUMBER,
+       cii.ESRI_FEATURE,
+       cii.route_layer_id
+  FROM mtl_parameters         mp,
+       csi_item_instances     cii,
+       csi_i_assets           cia,
+       mfg_lookups            ml1,
+       pn_locations_all       pl,
+       mtl_categories_kfv     mck,
+       mtl_categories_tl      mct,
+       mtl_system_items_b_kfv msi,
+       mtl_serial_numbers     msn_prod,
+       mtl_system_items       msi_prod,
+       mtl_parameters         mp_prod,
+       fa_additions_b         fa,
+       mtl_object_genealogy   mog,
+       mtl_serial_numbers     msn,
+       mtl_serial_numbers     msn_parent,
+       csi_item_instances     cii2,
+       mfg_lookups            ml2,
+       CSI_II_GEOLOCATIONS    GEO,
+       EAM_ASSET_SAFETY_TYPES SAF,
+       CSI_INSTANCE_STATUSES  CIS
+ WHERE mp.organization_id = msn.current_organization_id
+   AND msn.current_organization_id = msi.organization_id
+   AND msi.inventory_item_id = msn.inventory_item_id
+   AND msi.eam_item_type in (1, 3)
+   AND msi.serial_number_control_code <> 1
+   AND msn.inventory_item_id = cii.inventory_item_id
+   AND msn.serial_number = cii.serial_number
+   AND msn.gen_object_id = mog.object_id(+)
+   AND cii.asset_criticality_code = ml1.lookup_code(+)
+   AND ml1.lookup_type(+) = 'MTL_EAM_ASSET_CRITICALITY'
+   AND cii.pn_location_id = pl.location_id(+)
+   AND cii.category_id = mck.category_id(+)
+   AND cii.equipment_gen_object_id = msn_prod.gen_object_id(+)
+   AND msn_prod.current_organization_id = msi_prod.organization_id(+)
+   AND msn_prod.inventory_item_id = msi_prod.inventory_item_id(+)
+   AND msi_prod.organization_id = mp_prod.organization_id(+)
+   AND msi_prod.equipment_type(+) = 1
+   AND cii.instance_id = cia.instance_id(+)
+   AND cia.fa_asset_id = fa.asset_id(+)
+   AND CII.INSTANCE_ID = GEO.INSTANCE_ID(+)
+   AND GEO.VALID_FLAG(+) = 'Y'
+   AND CII.INSTANCE_ID = SAF.INSTANCE_ID(+)
+   AND sysdate >= nvl(cia.active_start_date(+), sysdate)
+   AND sysdate <= nvl(cia.active_end_date(+), sysdate)
+   AND mog.parent_object_id = msn_parent.gen_object_id(+)
+   AND mog.genealogy_type(+) = 5
+   AND sysdate >= nvl(mog.start_date_active(+), sysdate)
+   AND sysdate <= nvl(mog.end_date_active(+), sysdate)
+   AND msn_parent.inventory_item_id = cii2.inventory_item_id(+)
+   AND msn_parent.serial_number = cii2.serial_number(+)
+   AND NOT EXISTS
+ (SELECT 1
+          FROM eam_org_maint_defaults eomd
+         WHERE eomd.object_id = cii.instance_id
+           AND eomd.organization_id = mp.maint_organization_id
+           AND eomd.object_type = 50)
+   AND ml2.lookup_type(+) = 'SERIAL_NUM_STATUS'
+   AND ml2.lookup_code(+) = MSN.CURRENT_STATUS
+   AND cii.INSTANCE_STATUS_ID = cis.INSTANCE_STATUS_ID
+   AND mck.category_id = mct.category_id(+)
+   AND mct.language(+) = userenv('LANG');
