@@ -1,0 +1,110 @@
+SQL> CREATE OR REPLACE
+  2    TYPE clob_obj IS OBJECT(
+  3                            c CLOB,
+  4                            ORDER MEMBER FUNCTION equals(
+  5                                                         p_c clob_obj
+  6                                                        )
+  7                              RETURN NUMBER 
+  8                          )
+  9  /
+
+Type created.
+SQL> create table tbl(v varchar2(10),c clob)
+  2  /
+
+Table created.
+
+SQL> insert
+  2    into tbl
+  3    select  job,
+  4            dname
+  5      from  dept d,
+  6            emp e
+  7      where e.deptno = d.deptno
+  8  /
+
+14 rows created.
+
+SQL> commit;
+
+Commit complete.
+
+SQL> column c format a20
+SQL> select  v,
+  2          c
+  3    from  tbl t1
+  4    where not exists (
+  5                      select  1
+  6                        from  tbl t2
+  7                        where t2.rowid < t1.rowid
+  8                          and (dbms_lob.compare(t1.c,t2.c) = 0 or (t1.c is null and t2.c is null))
+  9                          and (t2.v = t1.v or (t1.v is null and t2.v is null))
+ 10                     )
+ 11  /
+
+V          C
+---------- --------------------
+MANAGER    ACCOUNTING
+PRESIDENT  ACCOUNTING
+CLERK      ACCOUNTING
+CLERK      RESEARCH
+MANAGER    RESEARCH
+ANALYST    RESEARCH
+SALESMAN   SALES
+MANAGER    SALES
+CLERK      SALES
+
+9 rows selected.
+
+SQL> 
+
+
+
+
+
+
+SQL> CREATE OR REPLACE
+  2    TYPE BODY clob_obj
+  3      IS
+  4        ORDER MEMBER FUNCTION equals(
+  5                                     p_c clob_obj
+  6                                    )
+  7          RETURN NUMBER
+  8          IS
+  9          BEGIN
+ 10              RETURN CASE
+ 11                       WHEN SELF.c IS NULL AND p_c.c IS NULL THEN 0
+ 12                       ELSE NVL(dbms_lob.compare(SELF.c,p_c.c),1)
+ 13                     END;
+ 14        END;
+ 15  END;
+ 16  /
+
+Type body created.
+
+SQL> column c format a15
+SQL> with t as (
+  2             select  distinct v,
+  3                              clob_obj(c) c
+  4               from  tbl
+  5            )
+  6  select  v,
+  7          treat(c as clob_obj).c as c
+  8    from  t
+  9  /
+
+V          C
+---------- ---------------
+ANALYST    RESEARCH
+CLERK      ACCOUNTING
+CLERK      RESEARCH
+CLERK      SALES
+MANAGER    ACCOUNTING
+MANAGER    RESEARCH
+MANAGER    SALES
+PRESIDENT  ACCOUNTING
+SALESMAN   SALES
+
+9 rows selected.
+
+SQL> 
