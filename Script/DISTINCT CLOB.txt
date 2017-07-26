@@ -108,3 +108,6 @@ SALESMAN   SALES
 9 rows selected.
 
 SQL> 
+
+
+http://www.orafaq.com/forum/t/183194/0/
